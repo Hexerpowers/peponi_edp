@@ -3,7 +3,7 @@ import time
 import pythonping
 
 
-# from netifaces import interfaces, ifaddresses, AF_INET
+from netifaces import interfaces, ifaddresses, AF_INET
 
 
 class Network:
@@ -27,31 +27,3 @@ class Network:
                 net_available = True
                 self.lg.log("Сетевое подключение обнаружено.")
             time.sleep(1)
-
-    def ping_inet(self):
-        try:
-            response_list = pythonping.ping('8.8.8.8', size=10, count=2, timeout=2)
-            ping = response_list.rtt_avg_ms
-            if ping < 2000:
-                self.lg.log("Пинг до Google (наличие сети): "+str(ping)+" ms")
-                return True
-            else:
-                self.lg.err("Ошибка подключения к сети: превышено время ожидания (2000ms).")
-                return False
-        except Exception as e:
-            self.lg.err("Ошибка обнаружения сети: "+str(e))
-            return False
-
-    def ping_server(self):
-        try:
-            response_list = pythonping.ping(self.config['network']['base_url'], size=10, count=2, timeout=2)
-            ping = response_list.rtt_avg_ms
-            if ping < 2000:
-                self.lg.log("Пинг до сервера приложения: "+str(ping)+" ms")
-                return True
-            else:
-                self.lg.err("Ошибка подключения к серверу приложения: превышено время ожидания (2000ms).")
-                return False
-        except Exception as e:
-            self.lg.err("Ошибка обнаружения сервера: "+str(e))
-

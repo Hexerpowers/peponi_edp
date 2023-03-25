@@ -16,13 +16,13 @@ HD = Handler(config, ST, LG)
 TR = Transport(config, ST, LG)
 NW = Network(config, ST, LG)
 
-# NW.wait_for_connection()
-NW.ping_inet()
-boot_lock = NW.ping_server()
+NW.wait_for_connection()
 
-if boot_lock or config['general']['mode'] == 'test':
-    HD.start()
-    TR.start()
+HD.start()
+TR.start()
 
+try:
     while True:
         time.sleep(1)
+except KeyboardInterrupt as e:
+    LG.log('KeyboardInterrupt, остановлено пользователем')
