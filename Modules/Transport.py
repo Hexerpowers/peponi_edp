@@ -22,7 +22,7 @@ class Transport:
         raw_response = "{}"
         parsed_response = {}
         req_interval = float(self.config['general']['req_interval'])
-        full_url = self.config['network']['protocol'] + self.config['network']['base_url'] + ":5252" + \
+        full_url = self.config['network']['protocol'] + self.config['network']['base_url'] + ":5052" + \
             self.config['network']['get_position_method']
 
         while True:
@@ -49,7 +49,7 @@ class Transport:
         raw_response = "{}"
         parsed_response = {}
         state_interval = float(self.config['general']['state_interval'])
-        full_url = self.config['network']['protocol'] + self.config['network']['base_url'] + ":5252" + \
+        full_url = self.config['network']['protocol'] + self.config['network']['base_url'] + ":5052" + \
             self.config['network']['get_runtime_method']
 
         while True:
