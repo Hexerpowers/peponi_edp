@@ -12,12 +12,10 @@ class Transport:
         self.lg = lg
         self.position_loop = Thread(target=self.position, daemon=True, args=())
         self.runtime_loop = Thread(target=self.runtime, daemon=True, args=())
-        self.telemetry_loop = Thread(target=self.telemetry, daemon=True, args=())
 
     def start(self):
         self.position_loop.start()
         self.runtime_loop.start()
-        self.telemetry_loop.start()
 
     def position(self):
         got_once = False
@@ -52,7 +50,7 @@ class Transport:
         parsed_response = {}
         state_interval = float(self.config['general']['state_interval'])
         full_url = self.config['network']['protocol'] + self.config['network']['base_url'] + ":5252" + \
-                   self.config['network']['get_runtime_method']
+            self.config['network']['get_runtime_method']
 
         while True:
             time.sleep(state_interval)
@@ -70,18 +68,3 @@ class Transport:
                     state=parsed_response['state'],
                     route=parsed_response['route']
                 )
-
-    def telemetry(self):
-        telem_interval = float(self.config['general']['telem_interval'])
-        full_url = self.config['network']['protocol'] + self.config['network']['base_url'] + ":5252" + \
-            self.config['network']['set_telemetry_method']
-
-        while True:
-            time.sleep(telem_interval)
-            telemetry = self.st.get_telemetry()
-            try:
-                req = requests.post(full_url, data=json.dumps(telemetry))
-                if req.status_code != 200:
-                    self.lg.err("Ошибка подключения к серверу приложения: status_code=" + str(req.status_code))
-            except Exception as e:
-                self.lg.err("Ошибка получения информации от сервера: " + str(e))
