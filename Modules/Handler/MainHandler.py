@@ -22,11 +22,25 @@ class MainHandler:
         self.lg = lg
         self.main = Thread(target=self.main, daemon=True, args=())
         #self.vehicle = connect('/dev/ttyAMA0', wait_ready=True, baud=57600)
+        # if self.vehicle.parameters['WP_YAW_BEHAVIOR'] != 0:
+        #     self.vehicle.parameters['WP_YAW_BEHAVIOR'] = 0
         #self.GF = GuidedFlight(st, lg, self.vehicle)
 
     def start(self):
         self.main.start()
         #self.GF.start()
+
+    @staticmethod
+    def get_battery_charge():
+        return 100
+
+    @staticmethod
+    def get_power():
+        return {
+            "state": 1,
+            "voltage": 25,
+            "current": 0.5
+        }
 
     def main(self):
         while True:
@@ -45,6 +59,10 @@ class MainHandler:
             response_list = pythonping.ping('127.0.0.1', size=10, count=1, timeout=2000)
             ping = int(response_list.rtt_avg_ms)
             self.st.set_ping(ping)
+
+            self.st.set_battery_charge(self.get_battery_charge())
+
+            self.st.set_power(self.get_power())
 
 
 

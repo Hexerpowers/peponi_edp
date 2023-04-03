@@ -1,6 +1,7 @@
 import time
 from threading import Thread
 from dronekit import connect, VehicleMode
+from pymavlink import mavutil
 
 
 class GuidedFlight:
@@ -21,11 +22,25 @@ class GuidedFlight:
     def stop(self):
         self.run_f = False
 
+    def send_ned_velocity(self, velocity_x, velocity_y, velocity_z, duration):
+        msg = self.vehicle.message_factory.set_position_target_local_ned_encode(
+            0,
+            0, 0,
+            mavutil.mavlink.MAV_FRAME_BODY_OFFSET_NED,
+            0b0000111111000111,
+            0, 0, 0,
+            velocity_x, velocity_y, velocity_z,
+            0, 0, 0,
+            0, 0)
+        for i in range(0, duration):
+            self.vehicle.send_mavlink(msg)
+            time.sleep(0.2)
+
     def move_2d(self, x, y):
-        pass
+        self.send_ned_velocity(x, y, 0, 1)
 
     def move_z(self, speed):
-        pass
+        self.send_ned_velocity(0, 0, -speed, 1)
 
     def run(self):
         self.lg.log("Ожидаю разрешения на взлёт...")
@@ -44,6 +59,7 @@ class GuidedFlight:
                 if self.st.get_runtime()['comm_ok']:
                     if self.vehicle.is_armable:
                         self.lg.log("AP инициализирован, подключение установлено. Взлёт разрешён.")
+                        self.st.set_ready(True)
                         self.state = 1
                     else:
                         while not self.vehicle.is_armable:
@@ -63,6 +79,7 @@ class GuidedFlight:
                     if self.vehicle.location.global_relative_frame.alt <= 2:
                         time.sleep(2)
                         self.lg.log("Посадка успешна")
+                        self.st.set_ready(False)
                         break
                     time.sleep(0.2)
                 self.vehicle.armed = False
@@ -130,7 +147,7 @@ class GuidedFlight:
                     else:
                         move = self.st.get_move()
                         if move['x'] != 0 or move['y'] != 0:
-                            self.move_2d(move['x'], move['y'])
+                            self.move_2d(int(move['x']), int(move['y']))
                         else:
                             self.move_2d(0, 0)
 
@@ -148,7 +165,7 @@ class GuidedFlight:
                     self.vehicle.mode = VehicleMode("LAND")
                     while True:
                         if self.vehicle.location.global_relative_frame.alt <= 2:
-                            time.sleep(2)
+                            time.sleep(3)
                             self.lg.log("Посадка успешна")
                             break
                         time.sleep(0.2)

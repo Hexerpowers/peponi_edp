@@ -6,6 +6,7 @@ from fastapi import FastAPI, Request
 import uvicorn
 from fastapi.middleware.cors import CORSMiddleware
 
+
 class HttpServer:
     def __init__(self, config, st, lg):
         self.config = config
@@ -42,13 +43,20 @@ class HttpServer:
                 "status": "OK"
             }
 
-
         @self.api.post("/api/v1/post/settings")
         async def set_settings(data: Request):
             settings = await data.json()
             self.st.set_runtime('takeoff_speed', settings['takeoff_speed'])
             self.st.set_runtime('ground_speed', settings['ground_speed'])
             self.st.set_runtime('target_alt', settings['target_alt'])
+            return {
+                "status": "OK"
+            }
+
+        @self.api.post("/api/v1/post/move")
+        async def post_move(data: Request):
+            controls = await data.json()
+            self.st.set_move(controls['x'], controls['y'])
             return {
                 "status": "OK"
             }
@@ -73,17 +81,25 @@ class HttpServer:
                 "ping": str(self.st.get_ping())
             }
 
+        @self.api.get("/api/v1/get/charge")
+        async def get_charge():
+            return {
+                "charge": str(self.st.get_battery_charge())
+            }
 
+        @self.api.get("/api/v1/get/power")
+        async def get_power():
+            return {
+                "state": str(self.st.get_power()['state']),
+                "voltage": str(self.st.get_power()['voltage']),
+                "current": str(self.st.get_power()['current']),
+            }
 
-        # @self.api.post("/api/v1/get/position_n_theta")
-        # async def get_position_set_theta(data: Request):
-        #     theta = await data.json()
-        #     self.st.set_theta(theta['theta'])
-        #     self.st.set_robot_timestamp(math.floor(time.time()))
-        #     return {
-        #         "position": self.st.get_position(0)
-        #     }
+        @self.api.get("/api/v1/get/ready")
+        async def get_ready():
+            return {
+                "ready": str(self.st.get_ready())
+            }
 
         self.lg.log("Принимаю запросы...")
-        uvicorn.run(self.api, host="0.0.0.0", port=5052,)
-        # uvicorn.run(self.api, host="0.0.0.0", port=5052, log_level="critical")
+        uvicorn.run(self.api, host="0.0.0.0", port=5052, log_level="critical")
