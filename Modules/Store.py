@@ -1,39 +1,57 @@
 class Store:
     def __init__(self):
-        self.position = {
-            'pos_x': 0,
-            'pos_y': 0,
-            'pos_t': 0,
-            'accuracy': 0,
+        self.signals = {
+            "takeoff": False,
+            "landing": False,
+            "manual": False,
+        }
+
+        self.move = {
+            "x": 0,
+            "y": 0,
         }
 
         self.runtime = {
-            "state": False,
-            "route": {}
+            "comm_ok": False,
+            "takeoff_speed": 0.5,
+            "ground_speed": 0.5,
+            "target_alt": 2,
+            "mode": 0
         }
 
-    def __str__(self):
-        return "Position: " + str(self.position)
+        self.tracking = {
+            "gui_timestamp": 0,
+            "hank_timestamp": 0,
+        }
 
-    def set_position(self, pos_x, pos_y, accuracy):
-        self.position['pos_x'] = int(pos_x)
-        self.position['pos_y'] = int(pos_y)
-        self.position['accuracy'] = int(accuracy)
+        self.ping = 2000
 
-    def set_theta(self, pos_t):
-        self.position['pos_t'] = int(pos_t)
+    def get_signals(self):
+        return self.signals
 
-    def set_runtime(self, state, route):
-        self.runtime['state'] = bool(state)
-        self.runtime['route'] = route
+    def get_runtime(self):
+        return self.runtime
 
-    def get_position(self): return self.position
+    def get_move(self):
+        return self.move
 
-    def get_state(self):
-        return self.runtime['state']
+    def get_ping(self):
+        return self.ping
 
-    def get_route(self):
-        if len(self.runtime['route']) == 0:
-            return False
-        else:
-            return self.runtime['route']
+    def get_tracking(self):
+        return self.tracking
+
+    def set_signal(self, signal, val):
+        self.signals[signal] = val
+
+    def set_runtime(self, name, val):
+        self.runtime[name] = val
+
+    def set_move(self, move):
+        self.move = move
+
+    def set_gui_timestamp(self, timestamp):
+        self.tracking['gui_timestamp'] = timestamp
+
+    def set_ping(self, ping):
+        self.ping = ping

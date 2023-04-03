@@ -1,19 +1,19 @@
 import configparser
 import time
 
-from Modules.Handler import Handler
-from Modules.Logger import Logger
+from Modules.Handler.MainHandler import MainHandler
+from Modules.Common.Logger import Logger
 from Modules.Store import Store
-from Modules.Transport import Transport
-from Modules.Network import Network
+from Modules.Transport.HttpServer import HttpServer
+from Modules.Common.Network import Network
 
 config = configparser.ConfigParser()
 config.read("endpoint.cfg")
 
-LG = Logger()
+LG = Logger(config)
 ST = Store()
-HD = Handler(config, ST, LG)
-TR = Transport(config, ST, LG)
+HD = MainHandler(config, ST, LG)
+TR = HttpServer(config, ST, LG)
 NW = Network(config, ST, LG)
 
 NW.wait_for_connection()
