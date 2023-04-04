@@ -46,6 +46,7 @@ class HttpServer:
         @self.api.post("/api/v1/post/settings")
         async def set_settings(data: Request):
             settings = await data.json()
+            print(settings)
             self.st.set_runtime('takeoff_speed', settings['takeoff_speed'])
             self.st.set_runtime('ground_speed', settings['ground_speed'])
             self.st.set_runtime('target_alt', settings['target_alt'])

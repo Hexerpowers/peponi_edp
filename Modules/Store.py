@@ -2,7 +2,7 @@ class Store:
     def __init__(self):
         self.signals = {
             "takeoff": False,
-            "landing": False,
+            "land": False,
             "manual": False,
         }
 
@@ -66,10 +66,10 @@ class Store:
     def set_runtime(self, name, val):
         self.runtime[name] = val
 
-    def set_move(self, move):
+    def set_move(self, move_x, move_y):
         self.move = {
-            "x": move[0] * self.runtime['ground_speed'],
-            "y": move[1] * self.runtime['ground_speed']
+            "x": float(move_x) * float(self.runtime['ground_speed']),
+            "y": float(move_y) * float(self.runtime['ground_speed'])
         }
 
     def set_gui_timestamp(self, timestamp):

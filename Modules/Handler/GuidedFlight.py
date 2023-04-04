@@ -73,7 +73,7 @@ class GuidedFlight:
             #
 
             if self.state == 9:
-                self.lg.err("Ошибка в процессе полёта! Сажусь...")
+                self.lg.error("Ошибка в процессе полёта! Сажусь...")
                 self.vehicle.mode = VehicleMode("LAND")
                 while True:
                     if self.vehicle.location.global_relative_frame.alt <= 2:
@@ -123,11 +123,11 @@ class GuidedFlight:
                             break
                         time.sleep(0.2)
                     while True:
-                        if self.vehicle.location.global_relative_frame.alt >= int(self.st.get_runtime()['target_alt']) * 0.95:
+                        if self.vehicle.location.global_relative_frame.alt >= float(self.st.get_runtime()['target_alt']) * 0.95:
                             self.lg.log("Выход на высоту успешно, зависаю...")
                             break
                         else:
-                            self.move_z(int(self.st.get_runtime()['takeoff_speed']))
+                            self.move_z(float(self.st.get_runtime()['takeoff_speed']))
                         time.sleep(0.2)
                     self.st.set_signal('takeoff', False)
                     self.state = 3
@@ -147,7 +147,7 @@ class GuidedFlight:
                     else:
                         move = self.st.get_move()
                         if move['x'] != 0 or move['y'] != 0:
-                            self.move_2d(int(move['x']), int(move['y']))
+                            self.move_2d(float(move['x']), float(move['y']))
                         else:
                             self.move_2d(0, 0)
 
@@ -161,7 +161,7 @@ class GuidedFlight:
                 if not self.st.get_runtime()['comm_ok']:
                     self.state = 9
                 else:
-                    self.lg.err("Получена команда на посадку. Сажусь...")
+                    self.lg.log("Получена команда на посадку. Сажусь...")
                     self.vehicle.mode = VehicleMode("LAND")
                     while True:
                         if self.vehicle.location.global_relative_frame.alt <= 2:
@@ -170,4 +170,5 @@ class GuidedFlight:
                             break
                         time.sleep(0.2)
                     self.vehicle.armed = False
+                    self.st.set_signal('land', False)
                     self.state = 0

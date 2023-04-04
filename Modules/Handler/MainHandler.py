@@ -2,11 +2,11 @@ import math
 import sys
 import os
 import time
-# from dronekit import connect, VehicleMode
+from dronekit import connect, VehicleMode
 
 import pythonping
 
-# from Modules.Handler.GuidedFlight import GuidedFlight
+from Modules.Handler.GuidedFlight import GuidedFlight
 
 current = os.path.dirname(os.path.realpath(__file__))
 parent = os.path.dirname(current)
@@ -21,14 +21,14 @@ class MainHandler:
         self.st = st
         self.lg = lg
         self.main = Thread(target=self.main, daemon=True, args=())
-        #self.vehicle = connect('/dev/ttyAMA0', wait_ready=True, baud=57600)
-        # if self.vehicle.parameters['WP_YAW_BEHAVIOR'] != 0:
-        #     self.vehicle.parameters['WP_YAW_BEHAVIOR'] = 0
-        #self.GF = GuidedFlight(st, lg, self.vehicle)
+        self.vehicle = connect('/dev/ttyACM0', wait_ready=False, baud=57600)
+        if self.vehicle.parameters['WP_YAW_BEHAVIOR'] != 0:
+            self.vehicle.parameters['WP_YAW_BEHAVIOR'] = 0
+        self.GF = GuidedFlight(st, lg, self.vehicle)
 
     def start(self):
         self.main.start()
-        #self.GF.start()
+        self.GF.start()
 
     @staticmethod
     def get_battery_charge():
