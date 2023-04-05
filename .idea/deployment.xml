@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
-  <component name="PublishConfigData" autoUpload="On explicit save action" serverName="pi@192.168.22.13:22 password" remoteFilesAllowedToDisappearOnAutoupload="false" confirmBeforeUploading="false">
+  <component name="PublishConfigData" serverName="pi@192.168.22.13:22 password" remoteFilesAllowedToDisappearOnAutoupload="false" confirmBeforeUploading="false">
     <option name="confirmBeforeUploading" value="false" />
     <serverData>
       <paths name="jet@192.168.88.252:22 password">
@@ -13,11 +13,11 @@
       <paths name="pi@192.168.22.13:22 password">
         <serverdata>
           <mappings>
-            <mapping deploy="/home/pi/endpoint" local="$PROJECT_DIR$" web="/" />
+            <mapping deploy="/home/pi/watchman_endpoint" local="$PROJECT_DIR$" web="/" />
+            <mapping deploy="C:\Users\aakz\Work\watchman_endpoint" local="$PROJECT_DIR$/../watchman_core" />
           </mappings>
         </serverdata>
       </paths>
     </serverData>
-    <option name="myAutoUpload" value="ON_EXPLICIT_SAVE" />
   </component>
 </project>

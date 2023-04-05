@@ -21,6 +21,7 @@ class MainHandler:
         self.st = st
         self.lg = lg
         self.main = Thread(target=self.main, daemon=True, args=())
+        self.ping = Thread(target=self.ping, daemon=True, args=())
         self.vehicle = connect('/dev/ttyACM0', wait_ready=False, baud=57600)
         if self.vehicle.parameters['WP_YAW_BEHAVIOR'] != 0:
             self.vehicle.parameters['WP_YAW_BEHAVIOR'] = 0
@@ -28,6 +29,7 @@ class MainHandler:
 
     def start(self):
         self.main.start()
+        self.ping.start()
         self.GF.start()
 
     @staticmethod
@@ -42,29 +44,19 @@ class MainHandler:
             "current": 0.5
         }
 
+    def ping(self):
+        while True:
+            time.sleep(0.5)
+            response_list = pythonping.ping(self.config['network']['controller_addr'], size=10, count=1, timeout=2000)
+            self.st.set_ping(int(response_list.rtt_avg_ms))
+
     def main(self):
         while True:
-            time.sleep(0.01)
-
+            time.sleep(0.1)
             gui_ok = False
-            hank_ok = False
             tracking = self.st.get_tracking()
             if math.floor(time.time()) - tracking['gui_timestamp'] < 3:
                 gui_ok = True
-            if math.floor(time.time()) - tracking['hank_timestamp'] < 3:
-                hank_ok = True
-
             self.st.set_runtime('comm_ok', gui_ok)
-
-            response_list = pythonping.ping('127.0.0.1', size=10, count=1, timeout=2000)
-            ping = int(response_list.rtt_avg_ms)
-            self.st.set_ping(ping)
-
             self.st.set_battery_charge(self.get_battery_charge())
-
             self.st.set_power(self.get_power())
-
-
-
-
-
