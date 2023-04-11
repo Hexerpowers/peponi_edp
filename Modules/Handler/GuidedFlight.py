@@ -61,7 +61,7 @@ class GuidedFlight:
                 self.vehicle.armed = False
                 if self.st.get_runtime()['comm_ok']:
                     if self.vehicle.is_armable:
-                        self.lg.log("AP инициализирован, подключение установлено. Взлёт разрешён.")
+                        self.lg.log("AP инициализирован, взлёт разрешён.")
                         self.set_state(1)
                         continue
                     while not self.vehicle.is_armable:
@@ -109,7 +109,7 @@ class GuidedFlight:
                         self.set_state(3)
                         break
                     self.move_3d(0, 0, float(self.st.get_runtime()['takeoff_speed']))
-                    self.move_yaw(0)
+                    #self.move_yaw(0)
                     time.sleep(0.1)
 
             # Состояние 3 - Автоматический полёт
@@ -134,7 +134,7 @@ class GuidedFlight:
                     move_z = float(self.st.get_runtime()['takeoff_speed'])
 
                 self.move_3d(float(move['x']), float(move['y']), move_z)
-                self.move_yaw(0)
+                #self.move_yaw(0)
 
             # Состояние 4 - Посадка
             if self.state == 4:
@@ -145,7 +145,7 @@ class GuidedFlight:
                     self.set_state(8)
                     continue
                 self.lg.log("Получена команда на посадку. Сажусь...")
-                self.vehicle.mode = VehicleMode("RTL")
+                self.vehicle.mode = VehicleMode("LAND")
                 while True:
                     if self.st.get_signals()['stop']:
                         self.set_state(8)
@@ -167,14 +167,16 @@ class GuidedFlight:
                         self.set_state(4)
                         break
                     if self.st.get_signals()['takeoff']:
+                        self.vehicle.mode = VehicleMode("GUIDED")
                         self.set_state(2)
                         break
+                    time.sleep(0.1)
 
             # Состояние 9 - Ошибка в полёте
             if self.state == 9:
                 self.lg.error("Ошибка в процессе полёта! Сажусь...")
                 self.move_3d(0, 0, 0)
-                self.vehicle.mode = VehicleMode("RTL")
+                self.vehicle.mode = VehicleMode("LAND")
                 while True:
                     if self.vehicle.location.global_relative_frame.alt <= 2:
                         time.sleep(2)

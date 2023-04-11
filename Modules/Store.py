@@ -4,6 +4,7 @@ class Store:
             "takeoff": False,
             "land": False,
             "stop": False,
+            "photo": False
         }
 
         self.move = {
@@ -101,4 +102,5 @@ class Store:
             "takeoff": False,
             "land": False,
             "stop": False,
+            "photo": False
         }
