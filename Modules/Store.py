@@ -3,7 +3,7 @@ class Store:
         self.signals = {
             "takeoff": False,
             "land": False,
-            "manual": False,
+            "stop": False,
         }
 
         self.move = {
@@ -16,7 +16,15 @@ class Store:
             "takeoff_speed": 0.5,
             "ground_speed": 0.5,
             "target_alt": 2,
-            "mode": 0
+            "mode": 0,
+            "copter_state": 0
+        }
+
+        self.telemetry = {
+            "alt":0,
+            "roll": 0,
+            "pitch": 0,
+            "yaw": 0,
         }
 
         self.tracking = {
@@ -34,7 +42,8 @@ class Store:
             "current": 0
         }
 
-        self.ready = 0
+    def get_telemetry(self):
+        return self.telemetry
 
     def get_signals(self):
         return self.signals
@@ -56,9 +65,6 @@ class Store:
 
     def get_power(self):
         return self.power
-
-    def get_ready(self):
-        return self.ready
 
     def set_signal(self, signal, val):
         self.signals[signal] = val
@@ -84,5 +90,15 @@ class Store:
     def set_power(self, power):
         self.power = power
 
-    def set_ready(self, state):
-        self.ready = state
+    def set_copter_state(self, state):
+        self.runtime['copter_state'] = state
+
+    def set_telemetry(self, telemetry):
+        self.telemetry = telemetry
+
+    def drop_signals(self):
+        self.signals = {
+            "takeoff": False,
+            "land": False,
+            "stop": False,
+        }

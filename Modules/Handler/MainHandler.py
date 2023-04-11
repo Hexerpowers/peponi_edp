@@ -44,6 +44,19 @@ class MainHandler:
             "current": 0.5
         }
 
+    @staticmethod
+    def get_attitude():
+        return {
+            "roll": 0,
+            "pitch": 0,
+            "yaw": 0,
+            "alt": 0
+        }
+
+    @staticmethod
+    def take_photo():
+        return True
+
     def ping(self):
         while True:
             time.sleep(0.5)
@@ -60,3 +73,11 @@ class MainHandler:
             self.st.set_runtime('comm_ok', gui_ok)
             self.st.set_battery_charge(self.get_battery_charge())
             self.st.set_power(self.get_power())
+
+            self.st.set_telemetry(self.get_attitude())
+
+            if self.st.get_signals()['photo']:
+                self.take_photo()
+                self.st.set_signal('photo', False)
+
+

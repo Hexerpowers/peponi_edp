@@ -29,6 +29,13 @@ class HttpServer:
         self.server_loop.start()
 
     def serve(self):
+        @self.api.get("/api/v1/trig/stop")
+        async def trig_stop():
+            self.st.set_signal("stop", True)
+            return {
+                "status": "OK"
+            }
+
         @self.api.get("/api/v1/trig/takeoff")
         async def trig_takeoff():
             self.st.set_signal("takeoff", True)
@@ -39,6 +46,13 @@ class HttpServer:
         @self.api.get("/api/v1/trig/land")
         async def trig_land():
             self.st.set_signal("land", True)
+            return {
+                "status": "OK"
+            }
+
+        @self.api.get("/api/v1/trig/photo")
+        async def trig_photo():
+            self.st.set_signal("photo", True)
             return {
                 "status": "OK"
             }
@@ -66,7 +80,8 @@ class HttpServer:
         async def get_logs():
             self.st.set_gui_timestamp(math.floor(time.time()))
             return {
-                "status": "OK"
+                "status": "OK",
+                "copter_state": int(self.st.get_runtime()['copter_state']),
             }
 
         @self.api.get("/api/v1/get/logs")
