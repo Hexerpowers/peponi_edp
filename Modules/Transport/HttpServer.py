@@ -2,8 +2,8 @@ import math
 import time
 from threading import Thread
 
-from fastapi import FastAPI, Request
 import uvicorn
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 
 
@@ -86,7 +86,7 @@ class HttpServer:
         @self.api.get("/api/v1/get/logs")
         async def get_logs():
             return {
-                "status":"OK",
+                "status": "OK",
                 "log_list": str(self.lg.get_log_list())
             }
 
@@ -105,15 +105,18 @@ class HttpServer:
         @self.api.get("/api/v1/get/power")
         async def get_power():
             return {
-                "state": str(self.st.get_power()['state']),
+                "state": int(self.st.get_power()['state']),
                 "voltage": str(self.st.get_power()['voltage']),
                 "current": str(self.st.get_power()['current']),
             }
 
-        @self.api.get("/api/v1/get/ready")
-        async def get_ready():
+        @self.api.get("/api/v1/get/telemetry")
+        async def get_telemetry():
             return {
-                "ready": str(self.st.get_ready())
+                "alt": str(self.st.get_telemetry()['alt']),
+                "roll": str(self.st.get_telemetry()['roll']),
+                "pitch": str(self.st.get_telemetry()['pitch']),
+                "yaw": str(self.st.get_telemetry()['yaw']),
             }
 
         self.lg.log("Принимаю запросы...")

@@ -22,7 +22,7 @@ class Store:
         }
 
         self.telemetry = {
-            "alt":0,
+            "alt": 0,
             "roll": 0,
             "pitch": 0,
             "yaw": 0,

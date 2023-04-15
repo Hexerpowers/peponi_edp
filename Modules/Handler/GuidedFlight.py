@@ -1,5 +1,6 @@
 import time
 from threading import Thread
+
 from dronekit import VehicleMode
 from pymavlink import mavutil
 
@@ -70,9 +71,6 @@ class GuidedFlight:
 
             # Состояние 1 - Арминг
             if self.state == 1:
-                if not self.st.get_runtime()['comm_ok']:
-                    self.set_state(9)
-                    continue
                 if self.st.get_signals()['takeoff']:
                     self.lg.log("Получена команда на взлёт. Взлетаю...")
                     self.vehicle.mode = VehicleMode("GUIDED")
@@ -109,7 +107,7 @@ class GuidedFlight:
                         self.set_state(3)
                         break
                     self.move_3d(0, 0, float(self.st.get_runtime()['takeoff_speed']))
-                    #self.move_yaw(0)
+                    # self.move_yaw(0)
                     time.sleep(0.1)
 
             # Состояние 3 - Автоматический полёт
@@ -134,7 +132,7 @@ class GuidedFlight:
                     move_z = float(self.st.get_runtime()['takeoff_speed'])
 
                 self.move_3d(float(move['x']), float(move['y']), move_z)
-                #self.move_yaw(0)
+                # self.move_yaw(0)
 
             # Состояние 4 - Посадка
             if self.state == 4:
