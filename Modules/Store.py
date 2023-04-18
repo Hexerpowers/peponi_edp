@@ -77,11 +77,13 @@ class Store:
     def set_runtime(self, name, val):
         self.runtime[name] = val
 
-    def set_move(self, move_x, move_y, move_yaw):
+    def set_move(self, move_x, move_y, move_yaw, camera_pitch, camera_zoom):
         self.move = {
             "x": float(move_x) * float(self.runtime['ground_speed']),
             "y": float(move_y) * float(self.runtime['ground_speed']),
-            "yaw": int(move_yaw)
+            "yaw": int(move_yaw),
+            "cam_pitch": int(camera_pitch),
+            "cam_zoom": int(camera_zoom),
         }
 
     def set_gui_timestamp(self, timestamp):

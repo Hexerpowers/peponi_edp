@@ -2,7 +2,7 @@ import math
 import time
 from threading import Thread
 
-from dronekit import VehicleMode
+from dronekit import VehicleMode, LocationGlobalRelative
 from pymavlink import mavutil
 
 
@@ -44,11 +44,12 @@ class GuidedFlight:
             mavutil.mavlink.MAV_CMD_CONDITION_YAW,
             0,
             heading,
-            30,
-            1,
+            0,
+            0,
             is_relative,
             0, 0, 0)
         self.vehicle.send_mavlink(msg)
+        self.vehicle.flush()
 
     def set_state(self, state):
         self.state = state
@@ -89,8 +90,9 @@ class GuidedFlight:
                         if self.vehicle.location.global_relative_frame.alt >= 2 * 0.95:
                             break
                         time.sleep(0.1)
+                    a_location = LocationGlobalRelative(self.vehicle.location.global_relative_frame.lat, self.vehicle.location.global_relative_frame.lon, 90)
+                    self.vehicle.simple_goto(a_location)
                     self.move_yaw(0)
-                    self.target_yaw = self.vehicle.heading
                     self.set_state(2)
 
             # Состояние 2 - Взлёт на указанную высоту
@@ -131,8 +133,12 @@ class GuidedFlight:
                 if int(move['yaw']) == 1:
                     self.target_yaw += 0.1
                 elif int(move['yaw']) == -1:
-                    self.target_yaw += 0.1
+                    self.target_yaw -= 0.1
 
+                if self.target_yaw > 360:
+                    self.target_yaw = 0
+                if self.target_yaw < 0:
+                    self.target_yaw = 360
 
                 if (self.vehicle.location.global_relative_frame.alt - float(self.st.get_runtime()['target_alt'])) > 1:
                     move_z = -float(self.st.get_runtime()['takeoff_speed'])

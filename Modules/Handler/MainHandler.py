@@ -24,8 +24,10 @@ class MainHandler:
         self.ping = Thread(target=self.ping, daemon=True, args=())
         self.camera_move = Thread(target=self.camera_move, daemon=True, args=())
         self.vehicle = connect('/dev/ttyACM0', wait_ready=False, baud=57600)
-        if self.vehicle.parameters['WP_YAW_BEHAVIOR'] != 0:
-            self.vehicle.parameters['WP_YAW_BEHAVIOR'] = 0
+        # if self.vehicle.parameters['WP_YAW_BEHAVIOR'] != 0:
+        #     self.vehicle.parameters['WP_YAW_BEHAVIOR'] = 0
+        if self.vehicle.parameters['LAND_SPEED'] != 30:
+            self.vehicle.parameters['LAND_SPEED'] = 30
         self.GF = GuidedFlight(st, lg, self.vehicle)
 
     def start(self):
@@ -67,7 +69,6 @@ class MainHandler:
         while True:
             time.sleep(0.1)
             self.move_cam(self.st.get_move()['cam_pitch'], self.st.get_move()['cam_zoom'],)
-
 
     def ping(self):
         while True:
