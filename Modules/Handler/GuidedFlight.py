@@ -1,3 +1,4 @@
+import math
 import time
 from threading import Thread
 
@@ -12,6 +13,8 @@ class GuidedFlight:
 
         self.state = 0
         self.tele_ctr = 0
+
+        self.target_yaw = 0
 
         self.runnable = Thread(target=self.run, daemon=True, args=())
         self.vehicle = ve
@@ -86,6 +89,8 @@ class GuidedFlight:
                         if self.vehicle.location.global_relative_frame.alt >= 2 * 0.95:
                             break
                         time.sleep(0.1)
+                    self.move_yaw(0)
+                    self.target_yaw = self.vehicle.heading
                     self.set_state(2)
 
             # Состояние 2 - Взлёт на указанную высоту
@@ -107,7 +112,6 @@ class GuidedFlight:
                         self.set_state(3)
                         break
                     self.move_3d(0, 0, float(self.st.get_runtime()['takeoff_speed']))
-                    # self.move_yaw(0)
                     time.sleep(0.1)
 
             # Состояние 3 - Автоматический полёт
@@ -121,9 +125,14 @@ class GuidedFlight:
                 if self.st.get_signals()['stop']:
                     self.set_state(8)
                     continue
-
                 move = self.st.get_move()
                 move_z = 0
+
+                if int(move['yaw']) == 1:
+                    self.target_yaw += 0.1
+                elif int(move['yaw']) == -1:
+                    self.target_yaw += 0.1
+
 
                 if (self.vehicle.location.global_relative_frame.alt - float(self.st.get_runtime()['target_alt'])) > 1:
                     move_z = -float(self.st.get_runtime()['takeoff_speed'])
@@ -132,7 +141,7 @@ class GuidedFlight:
                     move_z = float(self.st.get_runtime()['takeoff_speed'])
 
                 self.move_3d(float(move['x']), float(move['y']), move_z)
-                # self.move_yaw(0)
+                self.move_yaw(math.ceil(self.target_yaw))
 
             # Состояние 4 - Посадка
             if self.state == 4:
@@ -174,8 +183,12 @@ class GuidedFlight:
             if self.state == 9:
                 self.lg.error("Ошибка в процессе полёта! Сажусь...")
                 self.move_3d(0, 0, 0)
-                self.vehicle.mode = VehicleMode("LAND")
+                self.vehicle.parameters['RTL_ALT'] = float(self.st.get_runtime()['return_alt'])
+                self.vehicle.mode = VehicleMode("RTL")
                 while True:
+                    if self.st.get_signals()['stop']:
+                        self.set_state(8)
+                        break
                     if self.vehicle.location.global_relative_frame.alt <= 2:
                         time.sleep(2)
                         self.lg.log("Посадка успешна")

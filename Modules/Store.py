@@ -10,6 +10,9 @@ class Store:
         self.move = {
             "x": 0,
             "y": 0,
+            "yaw":0,
+            "cam_pitch": 0,
+            "cam_zoom": 0
         }
 
         self.runtime = {
@@ -17,6 +20,7 @@ class Store:
             "takeoff_speed": 0.5,
             "ground_speed": 0.5,
             "target_alt": 2,
+            "return_alt": 2,
             "mode": 0,
             "copter_state": 0
         }
@@ -73,10 +77,11 @@ class Store:
     def set_runtime(self, name, val):
         self.runtime[name] = val
 
-    def set_move(self, move_x, move_y):
+    def set_move(self, move_x, move_y, move_yaw):
         self.move = {
             "x": float(move_x) * float(self.runtime['ground_speed']),
-            "y": float(move_y) * float(self.runtime['ground_speed'])
+            "y": float(move_y) * float(self.runtime['ground_speed']),
+            "yaw": int(move_yaw)
         }
 
     def set_gui_timestamp(self, timestamp):

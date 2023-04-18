@@ -22,6 +22,7 @@ class MainHandler:
         self.lg = lg
         self.main = Thread(target=self.main, daemon=True, args=())
         self.ping = Thread(target=self.ping, daemon=True, args=())
+        self.camera_move = Thread(target=self.camera_move, daemon=True, args=())
         self.vehicle = connect('/dev/ttyACM0', wait_ready=False, baud=57600)
         if self.vehicle.parameters['WP_YAW_BEHAVIOR'] != 0:
             self.vehicle.parameters['WP_YAW_BEHAVIOR'] = 0
@@ -30,6 +31,7 @@ class MainHandler:
     def start(self):
         self.main.start()
         self.ping.start()
+        self.camera_move.start()
         self.GF.start()
 
     @staticmethod
@@ -44,18 +46,28 @@ class MainHandler:
             "current": 0.5
         }
 
+    @staticmethod
+    def take_photo():
+        return True
+
+    @staticmethod
+    def move_cam(direction, zoom):
+        return True
+
     def get_attitude(self):
         return {
             "roll": math.degrees(float(self.vehicle.attitude.roll)),
             "pitch": math.degrees(float(self.vehicle.attitude.pitch)),
-            "yaw": int(self.vehicle.heading),
+            "yaw": self.vehicle.heading,
             "alt": int(self.vehicle.location.global_relative_frame.alt) if int(
                 self.vehicle.location.global_relative_frame.alt) > 0 else 0
         }
 
-    @staticmethod
-    def take_photo():
-        return True
+    def camera_move(self):
+        while True:
+            time.sleep(0.1)
+            self.move_cam(self.st.get_move()['cam_pitch'], self.st.get_move()['cam_zoom'],)
+
 
     def ping(self):
         while True:

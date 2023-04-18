@@ -63,6 +63,7 @@ class HttpServer:
             self.st.set_runtime('takeoff_speed', settings['takeoff_speed'])
             self.st.set_runtime('ground_speed', settings['ground_speed'])
             self.st.set_runtime('target_alt', settings['target_alt'])
+            self.st.set_runtime('return_alt', settings['return_alt'])
             return {
                 "status": "OK"
             }
@@ -70,7 +71,13 @@ class HttpServer:
         @self.api.post("/api/v1/post/move")
         async def post_move(data: Request):
             controls = await data.json()
-            self.st.set_move(controls['x'], controls['y'])
+            self.st.set_move(
+                controls['x'],
+                controls['y'],
+                controls['yaw'],
+                controls['cam_pitch'],
+                controls['cam_zoom']
+            )
             return {
                 "status": "OK"
             }
