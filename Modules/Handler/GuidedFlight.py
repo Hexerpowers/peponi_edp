@@ -90,7 +90,8 @@ class GuidedFlight:
                         if self.vehicle.location.global_relative_frame.alt >= 2 * 0.95:
                             break
                         time.sleep(0.1)
-                    a_location = LocationGlobalRelative(self.vehicle.location.global_relative_frame.lat, self.vehicle.location.global_relative_frame.lon, 90)
+                    a_location = LocationGlobalRelative(self.vehicle.location.global_relative_frame.lat,
+                                                        self.vehicle.location.global_relative_frame.lon, 2)
                     self.vehicle.simple_goto(a_location)
                     self.move_yaw(0)
                     self.set_state(2)

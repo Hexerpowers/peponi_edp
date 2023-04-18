@@ -68,13 +68,14 @@ class MainHandler:
     def camera_move(self):
         while True:
             time.sleep(0.1)
-            self.move_cam(self.st.get_move()['cam_pitch'], self.st.get_move()['cam_zoom'],)
+            self.move_cam(self.st.get_move()['cam_pitch'], self.st.get_move()['cam_zoom'], )
 
     def ping(self):
         while True:
-            time.sleep(0.5)
+            time.sleep(0.3)
             try:
-                response_list = pythonping.ping(self.config['network']['controller_addr'], size=10, count=1, timeout=2000)
+                response_list = pythonping.ping(self.config['network']['controller_addr'], size=5, count=1,
+                                                timeout=2000)
                 self.st.set_ping(int(response_list.rtt_avg_ms))
             except Exception as e:
                 self.lg.error(e)

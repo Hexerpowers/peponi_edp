@@ -10,7 +10,7 @@ class Store:
         self.move = {
             "x": 0,
             "y": 0,
-            "yaw":0,
+            "yaw": 0,
             "cam_pitch": 0,
             "cam_zoom": 0
         }
