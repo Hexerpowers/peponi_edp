@@ -6,7 +6,9 @@ import time
 import pythonping
 from dronekit import connect
 
+from Modules.Handler.CameraHandler import CameraHandler
 from Modules.Handler.GuidedFlight import GuidedFlight
+from Modules.Handler.PowerHandler import PowerHandler
 
 current = os.path.dirname(os.path.realpath(__file__))
 parent = os.path.dirname(current)
@@ -20,55 +22,39 @@ class MainHandler:
         self.config = config
         self.st = st
         self.lg = lg
+        self.power_state = {
+            "state": 1,
+            "voltage": 25,
+            "current": 0.5
+        }
         self.main = Thread(target=self.main, daemon=True, args=())
         self.ping = Thread(target=self.ping, daemon=True, args=())
-        self.camera_move = Thread(target=self.camera_move, daemon=True, args=())
+
+        self.PH = PowerHandler(st, lg, 0x22)
+        self.CH = CameraHandler(st, lg)
+
         self.vehicle = connect('/dev/ttyACM0', wait_ready=False, baud=57600)
-        # if self.vehicle.parameters['WP_YAW_BEHAVIOR'] != 0:
-        #     self.vehicle.parameters['WP_YAW_BEHAVIOR'] = 0
         if self.vehicle.parameters['LAND_SPEED'] != 30:
             self.vehicle.parameters['LAND_SPEED'] = 30
+
         self.GF = GuidedFlight(st, lg, self.vehicle)
 
     def start(self):
         self.main.start()
         self.ping.start()
-        self.camera_move.start()
+        self.PH.start()
+        self.CH.start()
         self.GF.start()
-
-    @staticmethod
-    def get_battery_charge():
-        return 100
-
-    @staticmethod
-    def get_power():
-        return {
-            "state": 1,
-            "voltage": 25,
-            "current": 0.5
-        }
-
-    @staticmethod
-    def take_photo():
-        return True
-
-    @staticmethod
-    def move_cam(direction, zoom):
-        return True
 
     def get_attitude(self):
         return {
             "roll": math.degrees(float(self.vehicle.attitude.roll)),
             "pitch": math.degrees(float(self.vehicle.attitude.pitch)),
             "yaw": self.vehicle.heading,
+            "t_yaw": self.GF.get_target_yaw(),
             "alt": int(self.vehicle.location.global_relative_frame.alt) if int(
                 self.vehicle.location.global_relative_frame.alt) > 0 else 0
         }
-
-    def camera_move(self):
-        while True:
-            time.sleep(0.1)
-            self.move_cam(self.st.get_move()['cam_pitch'], self.st.get_move()['cam_zoom'], )
 
     def ping(self):
         while True:
@@ -88,11 +74,5 @@ class MainHandler:
             if math.floor(time.time()) - tracking['gui_timestamp'] < 3:
                 gui_ok = True
             self.st.set_runtime('comm_ok', gui_ok)
-            self.st.set_battery_charge(self.get_battery_charge())
-            self.st.set_power(self.get_power())
 
             self.st.set_telemetry(self.get_attitude())
-
-            if self.st.get_signals()['photo']:
-                self.take_photo()
-                self.st.set_signal('photo', False)

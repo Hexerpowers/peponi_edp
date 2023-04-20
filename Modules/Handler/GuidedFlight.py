@@ -22,6 +22,9 @@ class GuidedFlight:
     def start(self):
         self.runnable.start()
 
+    def get_target_yaw(self):
+        return self.target_yaw
+
     def move_3d(self, velocity_x, velocity_y, velocity_z):
         msg = self.vehicle.message_factory.set_position_target_local_ned_encode(
             0,
@@ -44,7 +47,7 @@ class GuidedFlight:
             mavutil.mavlink.MAV_CMD_CONDITION_YAW,
             0,
             heading,
-            0,
+            5,
             0,
             is_relative,
             0, 0, 0)

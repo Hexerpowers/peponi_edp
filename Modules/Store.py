@@ -44,7 +44,8 @@ class Store:
         self.power = {
             "state": 0,
             "voltage": 0,
-            "current": 0
+            "current_0": 0,
+            "current_1": 0
         }
 
     def get_telemetry(self):

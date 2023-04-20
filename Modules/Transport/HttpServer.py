@@ -114,7 +114,8 @@ class HttpServer:
             return {
                 "state": int(self.st.get_power()['state']),
                 "voltage": str(self.st.get_power()['voltage']),
-                "current": str(self.st.get_power()['current']),
+                "current": str(self.st.get_power()['current_0']),
+                "current_1": str(self.st.get_power()['current_1']),
             }
 
         @self.api.get("/api/v1/get/telemetry")
