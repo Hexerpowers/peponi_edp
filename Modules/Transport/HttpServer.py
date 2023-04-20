@@ -125,6 +125,7 @@ class HttpServer:
                 "roll": str(self.st.get_telemetry()['roll']),
                 "pitch": str(self.st.get_telemetry()['pitch']),
                 "yaw": str(self.st.get_telemetry()['yaw']),
+                "t_yaw": str(self.st.get_telemetry()['t_yaw'])
             }
 
         self.lg.log("Принимаю запросы...")

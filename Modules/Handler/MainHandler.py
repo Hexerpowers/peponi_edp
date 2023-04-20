@@ -51,7 +51,7 @@ class MainHandler:
             "roll": math.degrees(float(self.vehicle.attitude.roll)),
             "pitch": math.degrees(float(self.vehicle.attitude.pitch)),
             "yaw": self.vehicle.heading,
-            "t_yaw": self.GF.get_target_yaw(),
+            "t_yaw": int(self.GF.get_target_yaw()),
             "alt": int(self.vehicle.location.global_relative_frame.alt) if int(
                 self.vehicle.location.global_relative_frame.alt) > 0 else 0
         }

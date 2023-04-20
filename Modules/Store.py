@@ -30,6 +30,7 @@ class Store:
             "roll": 0,
             "pitch": 0,
             "yaw": 0,
+            "t_yaw": 0
         }
 
         self.tracking = {

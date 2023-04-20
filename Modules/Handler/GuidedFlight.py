@@ -47,7 +47,7 @@ class GuidedFlight:
             mavutil.mavlink.MAV_CMD_CONDITION_YAW,
             0,
             heading,
-            5,
+            0,
             0,
             is_relative,
             0, 0, 0)
@@ -96,6 +96,7 @@ class GuidedFlight:
                     a_location = LocationGlobalRelative(self.vehicle.location.global_relative_frame.lat,
                                                         self.vehicle.location.global_relative_frame.lon, 2)
                     self.vehicle.simple_goto(a_location)
+                    time.sleep(0.2)
                     self.move_yaw(0)
                     self.set_state(2)
 
@@ -135,9 +136,9 @@ class GuidedFlight:
                 move_z = 0
 
                 if int(move['yaw']) == 1:
-                    self.target_yaw += 0.1
+                    self.target_yaw += 0.03
                 elif int(move['yaw']) == -1:
-                    self.target_yaw -= 0.1
+                    self.target_yaw -= 0.03
 
                 if self.target_yaw > 360:
                     self.target_yaw = 0
