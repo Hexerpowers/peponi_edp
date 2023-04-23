@@ -8,7 +8,7 @@ from Modules.Store import Store
 from Modules.Transport.HttpServer import HttpServer
 
 config = configparser.ConfigParser()
-config.read("endpoint.cfg")
+config.read("/home/pi/watchman_endpoint/endpoint.cfg")
 
 LG = Logger(config)
 ST = Store()

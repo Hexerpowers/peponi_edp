@@ -1,3 +1,4 @@
+import math
 import time
 from threading import Thread
 
@@ -31,7 +32,11 @@ class PowerHandler:
 
     @staticmethod
     def get_battery_charge(voltage):
-        return (voltage - 18) * 13.8
+        val = int(math.floor((voltage - 36) * 6.94))
+        if val < 0:
+            return 0
+        else:
+            return val
 
     def update(self):
         while self.enabled:
@@ -44,17 +49,17 @@ class PowerHandler:
                     self.lg.error('Нет могу подключиться к устройству i2c по адресу ' + str(self.addr))
                     time.sleep(1)
             state = 1
-            if self.get_battery_charge(data[2]) > 20:
+            if self.get_battery_charge(round(int(data[2]) * 0.23, 1)) > 90:
                 state = 2
             self.st.set_power(
                 {
                     "state": state,
                     "current_0": data[0],
                     "current_1": data[1],
-                    "voltage": data[2]
+                    "voltage": round(int(data[2]) * 0.23, 1)
                 }
             )
-            self.st.set_battery_charge(self.get_battery_charge(data[2]))
+            self.st.set_battery_charge(self.get_battery_charge(round(int(data[2]) * 0.23, 1)))
 
     def __del__(self):
         while True:

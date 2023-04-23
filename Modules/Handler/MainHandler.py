@@ -58,7 +58,7 @@ class MainHandler:
 
     def ping(self):
         while True:
-            time.sleep(0.3)
+            time.sleep(2)
             try:
                 response_list = pythonping.ping(self.config['network']['controller_addr'], size=5, count=1,
                                                 timeout=2000)
