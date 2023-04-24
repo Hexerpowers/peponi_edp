@@ -60,7 +60,7 @@ class MainHandler:
         while True:
             time.sleep(2)
             try:
-                response_list = pythonping.ping(self.config['network']['controller_addr'], size=5, count=1,
+                response_list = pythonping.ping(self.st.get_controller_address(), size=5, count=1,
                                                 timeout=2000)
                 self.st.set_ping(int(response_list.rtt_avg_ms))
             except Exception as e:

@@ -9,8 +9,10 @@ class Logger:
         self.log_list = ''''''
         if config['general']['log'] == 'clear':
             self.log_file = open('/home/pi/watchman_endpoint/log.txt', 'w+')
+            # self.log_file = open('log.txt', 'w+')
         else:
             self.log_file = open('/home/pi/watchman_endpoint/log.txt', 'a+')
+            # self.log_file = open('log.txt', 'a+')
         self.log_file.write("---------------STARTUP---------------\n")
 
     def __del__(self):

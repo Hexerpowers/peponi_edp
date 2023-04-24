@@ -137,7 +137,7 @@ class GuidedFlight:
                         self.set_state(4)
                         break
                     if self.vehicle.location.global_relative_frame.alt >= float(
-                            self.st.get_runtime()['target_alt'])*0.92:
+                            self.st.get_runtime()['target_alt']) * 0.92:
                         self.lg.log("Выход на высоту успешно, зависаю...")
                         self.set_state(3)
                         break

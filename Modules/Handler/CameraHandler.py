@@ -10,10 +10,13 @@ class CameraHandler:
         self.lg = lg
 
         self.enabled = False
+        self.mode = False
+
         self.prev_vals = {
             "cam_pitch": 0,
             "cam_zoom": 0,
         }
+
         try:
             self.sock_out = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             self.sock_out.settimeout(2)
@@ -82,11 +85,15 @@ class CameraHandler:
                 self.take_picture()
                 self.st.set_signal('photo', False)
 
+            if self.st.get_signals()['mode']:
+                self.change_mode()
+                self.st.set_signal('mode', False)
+
     def pitch_up(self):
-        self.sock_out.sendall(b'\xff\x01\x00\x08\x00\xff\x08')
+        self.sock_out.sendall(b'\xff\x01\x00\x08\x00\x80\x89')
 
     def pitch_down(self):
-        self.sock_out.sendall(b'\xff\x01\x00\x10\x00\xff\x10')
+        self.sock_out.sendall(b'\xff\x01\x00\x10\x00\x80\x91')
 
     def zoom_in(self):
         self.sock_out.sendall(b'\xff\x01\x00\x40\x04\x00\x45')
@@ -102,6 +109,13 @@ class CameraHandler:
 
     def take_picture(self):
         self.sock_out.sendall(b'\xff\x01\x12\x00\x00\x00\x13')
+
+    def change_mode(self):
+        if self.mode:
+            self.sock_out.sendall(b'\xff\x01\x14\x00\x00\x00\x15')
+        else:
+            self.sock_out.sendall(b'\xff\x01\x14\x00\x01\x00\x16')
+        self.mode = not self.mode
 
     def __del__(self):
         self.sock_out.close()

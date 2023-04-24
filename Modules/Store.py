@@ -1,10 +1,12 @@
 class Store:
-    def __init__(self):
+    def __init__(self, config):
+        self.config = config
         self.signals = {
             "takeoff": False,
             "land": False,
             "stop": False,
-            "photo": False
+            "photo": False,
+            "mode": False
         }
 
         self.move = {
@@ -42,6 +44,8 @@ class Store:
 
         self.battery_charge = 0
 
+        self.controller_address = self.config['network']['controller_addr']
+
         self.power = {
             "state": 0,
             "voltage": 0,
@@ -72,6 +76,9 @@ class Store:
 
     def get_power(self):
         return self.power
+
+    def get_controller_address(self):
+        return self.controller_address
 
     def set_signal(self, signal, val):
         self.signals[signal] = val
@@ -106,10 +113,14 @@ class Store:
     def set_telemetry(self, telemetry):
         self.telemetry = telemetry
 
+    def set_controller_address(self, controller_address):
+        self.controller_address = controller_address
+
     def drop_signals(self):
         self.signals = {
             "takeoff": False,
             "land": False,
             "stop": False,
-            "photo": False
+            "photo": False,
+            "mode": False,
         }

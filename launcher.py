@@ -9,9 +9,10 @@ from Modules.Transport.HttpServer import HttpServer
 
 config = configparser.ConfigParser()
 config.read("/home/pi/watchman_endpoint/endpoint.cfg")
+# config.read("endpoint.cfg")
 
 LG = Logger(config)
-ST = Store()
+ST = Store(config)
 HD = MainHandler(config, ST, LG)
 TR = HttpServer(config, ST, LG)
 NW = Network(config, ST, LG)
@@ -26,3 +27,4 @@ try:
         time.sleep(1)
 except KeyboardInterrupt as e:
     LG.log('KeyboardInterrupt, остановлено пользователем')
+    LG.__del__()

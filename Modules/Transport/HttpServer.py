@@ -57,6 +57,13 @@ class HttpServer:
                 "status": "OK"
             }
 
+        @self.api.get("/api/v1/trig/mode")
+        async def trig_mode():
+            self.st.set_signal("mode", True)
+            return {
+                "status": "OK"
+            }
+
         @self.api.post("/api/v1/post/settings")
         async def set_settings(data: Request):
             settings = await data.json()
@@ -69,7 +76,7 @@ class HttpServer:
             }
 
         @self.api.post("/api/v1/post/move")
-        async def post_move(data: Request):
+        async def set_move(data: Request):
             controls = await data.json()
             self.st.set_move(
                 controls['x'],
@@ -83,7 +90,8 @@ class HttpServer:
             }
 
         @self.api.get("/api/v1/get/status")
-        async def get_logs():
+        async def get_status(data: Request):
+            self.st.set_controller_address(data.client.host)
             self.st.set_gui_timestamp(math.floor(time.time()))
             return {
                 "status": "OK",
@@ -114,7 +122,7 @@ class HttpServer:
             return {
                 "state": int(self.st.get_power()['state']),
                 "voltage": str(self.st.get_power()['voltage']),
-                "current": str(self.st.get_power()['current_0']),
+                "current_0": str(self.st.get_power()['current_0']),
                 "current_1": str(self.st.get_power()['current_1']),
             }
 

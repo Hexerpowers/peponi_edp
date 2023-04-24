@@ -33,10 +33,11 @@ class PowerHandler:
     @staticmethod
     def get_battery_charge(voltage):
         val = int(math.floor((voltage - 36) * 6.94))
-        if val < 0:
-            return 0
-        else:
-            return val
+        if val <= 0:
+            val = 0
+        if val >= 100:
+            val = 100
+        return val
 
     def update(self):
         while self.enabled:
