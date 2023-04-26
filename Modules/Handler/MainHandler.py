@@ -60,8 +60,8 @@ class MainHandler:
         while True:
             time.sleep(2)
             try:
-                response_list = pythonping.ping(self.st.get_controller_address(), size=5, count=1,
-                                                timeout=2000)
+                response_list = pythonping.ping(self.st.get_controller_address(), size=20, count=2,
+                                                timeout=2)
                 self.st.set_ping(int(response_list.rtt_avg_ms))
             except Exception as e:
                 self.lg.error(e)
@@ -71,7 +71,7 @@ class MainHandler:
             time.sleep(0.25)
             gui_ok = False
             tracking = self.st.get_tracking()
-            if math.floor(time.time()) - tracking['gui_timestamp'] < 3:
+            if math.floor(time.time()) - tracking['gui_timestamp'] < 5:
                 gui_ok = True
             self.st.set_runtime('comm_ok', gui_ok)
 

@@ -24,7 +24,7 @@ class PowerHandler:
             data = self.bus.read_i2c_block_data(self.addr, 0x00, 3)
             self.enabled = True
         except:
-            self.lg.error('Нет устройства i2c по адресу ' + str(addr))
+            self.lg.error('Нет i2c устройства телеметрии питания по адресу ' + str(hex(addr)))
 
     def start(self):
         self.get_power.start()
@@ -32,7 +32,7 @@ class PowerHandler:
 
     @staticmethod
     def get_battery_charge(voltage):
-        val = int(math.floor((voltage - 36) * 6.94))
+        val = int(math.floor((voltage - 41) * 14.29))
         if val <= 0:
             val = 0
         if val >= 100:
@@ -50,7 +50,7 @@ class PowerHandler:
                     self.lg.error('Нет могу подключиться к устройству i2c по адресу ' + str(self.addr))
                     time.sleep(1)
             state = 1
-            if self.get_battery_charge(round(int(data[2]) * 0.23, 1)) > 90:
+            if self.get_battery_charge(round(int(data[2]) * 0.23, 1)) > 75:
                 state = 2
             self.st.set_power(
                 {

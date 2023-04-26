@@ -71,7 +71,7 @@ class GuidedFlight:
             if self.state == 0:
                 self.vehicle.armed = False
                 if self.st.get_runtime()['comm_ok']:
-                    if self.st.get_battery_charge() >= 90:
+                    if self.st.get_battery_charge() >= 75:
                         if self.vehicle.is_armable:
                             self.power_wait = True
                             self.init_wait = True
@@ -82,10 +82,12 @@ class GuidedFlight:
                         if self.power_wait:
                             self.lg.log("Недостаточное напряжение питания")
                         self.power_wait = False
+                        time.sleep(0.5)
                     while not self.vehicle.is_armable:
                         if self.init_wait:
                             self.lg.log("Ожидаю инициализации AP...")
                         self.init_wait = False
+                        time.sleep(0.5)
 
             # Состояние 1 - Арминг
             if self.state == 1:
