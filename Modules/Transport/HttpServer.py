@@ -113,15 +113,25 @@ class HttpServer:
 
         @self.api.get("/api/v1/get/charge")
         async def get_charge():
+            if bool(self.st.config['general']['use_power_telemetry']):
+                charge = str(self.st.get_battery_charge())
+            else:
+                charge = "99"
             return {
-                "charge": str(self.st.get_battery_charge())
+                "charge": charge
             }
 
         @self.api.get("/api/v1/get/power")
         async def get_power():
+            if bool(self.st.config['general']['use_power_telemetry']):
+                state = int(self.st.get_power()['state'])
+                voltage = str(self.st.get_power()['voltage'])
+            else:
+                state = 2
+                voltage = 48
             return {
-                "state": int(self.st.get_power()['state']),
-                "voltage": str(self.st.get_power()['voltage']),
+                "state": state,
+                "voltage": voltage,
                 "current_0": str(self.st.get_power()['current_0']),
                 "current_1": str(self.st.get_power()['current_1']),
             }
@@ -137,6 +147,7 @@ class HttpServer:
             }
 
         self.lg.log("Принимаю запросы...")
-        uvicorn.run(self.api, host="0.0.0.0", port=5052, log_level="critical")
-
-        # uvicorn.run(self.api, host="0.0.0.0", port=5052, log_level="critical")
+        if bool(self.st.config['general']['show_errors']):
+            uvicorn.run(self.api, host="0.0.0.0", port=5052)
+        else:
+            uvicorn.run(self.api, host="0.0.0.0", port=5052, log_level="critical")

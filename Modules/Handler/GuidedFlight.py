@@ -62,6 +62,15 @@ class GuidedFlight:
         self.st.drop_signals()
         self.st.set_copter_state(state)
 
+    def power_check(self, level):
+        if bool(self.st.config['general']['use_power_telemetry']):
+            if self.st.get_battery_charge() >= level:
+                return True
+            else:
+                return False
+        else:
+            return True
+
     def run(self):
         self.lg.log("Ожидаю разрешения на взлёт...")
         while True:
@@ -71,11 +80,11 @@ class GuidedFlight:
             if self.state == 0:
                 self.vehicle.armed = False
                 if self.st.get_runtime()['comm_ok']:
-                    if self.st.get_battery_charge() >= 75:
+                    if self.power_check(60):
                         if self.vehicle.is_armable:
                             self.power_wait = True
                             self.init_wait = True
-                            self.lg.log("AP инициализирован, взлёт разрешён.")
+                            self.lg.log("Контроллер инициализирован, взлёт разрешён.")
                             self.set_state(1)
                             continue
                     else:
@@ -85,49 +94,55 @@ class GuidedFlight:
                         time.sleep(0.5)
                     while not self.vehicle.is_armable:
                         if self.init_wait:
-                            self.lg.log("Ожидаю инициализации AP...")
+                            self.lg.log("Ожидаю инициализации контроллера...")
                         self.init_wait = False
                         time.sleep(0.5)
 
             # Состояние 1 - Арминг
             if self.state == 1:
-                if self.st.get_battery_charge() <= 30:
+                if not self.power_check(30):
                     self.set_state(0)
                 if self.st.get_signals()['takeoff']:
-                    self.lg.log("Получена команда на взлёт. Взлетаю...")
+                    self.lg.log("Получена команда на взлёт. Запуск...")
                     self.vehicle.mode = VehicleMode("GUIDED")
                     self.vehicle.armed = True
-                    self.lg.log("Ожидаю ARM...")
+                    self.lg.log("Ожидаю готовности...")
+                    timeout = 0
                     while not self.vehicle.armed:
                         time.sleep(0.1)
-                    self.lg.log("ARM включён.")
+                        timeout+=0.1
+                        if timeout >=5:
+                            self.lg.error("Ошибка, коптер не готов к полёту")
+                    timeout = 0
+                    self.lg.log("Готовность получена")
                     time.sleep(1)
                     self.set_state(2)
 
             # Состояние 2 - Взлёт на указанную высоту
             if self.state == 2:
-                if self.st.get_battery_charge() <= 30:
-                    self.set_state(0)
-                if not self.st.get_runtime()['comm_ok']:
-                    self.set_state(9)
-                    continue
-                if self.st.get_signals()['stop']:
-                    self.set_state(8)
-                    continue
                 self.lg.log("Ожидаю взлёт...")
                 self.vehicle.simple_takeoff(2)
                 while True:
+                    if not self.power_check(30):
+                        self.set_state(0)
+                    if not self.st.get_runtime()['comm_ok']:
+                        self.set_state(9)
+                        continue
+                    if self.st.get_signals()['stop']:
+                        self.set_state(8)
+                        continue
+                    time.sleep(0.1)
                     if self.vehicle.location.global_relative_frame.alt >= 2 * 0.92:
                         break
-                    time.sleep(0.1)
                 a_location = LocationGlobalRelative(self.vehicle.location.global_relative_frame.lat,
                                                     self.vehicle.location.global_relative_frame.lon, 2)
                 self.vehicle.simple_goto(a_location)
-                time.sleep(0.2)
+                time.sleep(1)
                 self.move_yaw(0)
+                self.move_3d(0, 0, 0)
                 self.lg.log("Ожидаю выход на высоту...")
                 while True:
-                    if self.st.get_battery_charge() <= 30:
+                    if not self.power_check(30):
                         self.set_state(7)
                     if not self.st.get_runtime()['comm_ok']:
                         self.set_state(9)
@@ -139,7 +154,7 @@ class GuidedFlight:
                         self.set_state(4)
                         break
                     if self.vehicle.location.global_relative_frame.alt >= float(
-                            self.st.get_runtime()['target_alt']) * 0.92:
+                            self.st.get_runtime()['target_alt']) * 0.98:
                         self.lg.log("Выход на высоту успешно, зависаю...")
                         self.set_state(3)
                         break
@@ -148,7 +163,7 @@ class GuidedFlight:
 
             # Состояние 3 - Автоматический полёт
             if self.state == 3:
-                if self.st.get_battery_charge() <= 30:
+                if not self.power_check(30):
                     self.set_state(7)
                 if not self.st.get_runtime()['comm_ok']:
                     self.set_state(9)
@@ -163,9 +178,9 @@ class GuidedFlight:
                 move_z = 0
 
                 if int(move['yaw']) == 1:
-                    self.target_yaw += 0.09
+                    self.target_yaw += 0.1
                 elif int(move['yaw']) == -1:
-                    self.target_yaw -= 0.09
+                    self.target_yaw -= 0.1
 
                 if self.target_yaw > 360:
                     self.target_yaw = 0
@@ -183,18 +198,15 @@ class GuidedFlight:
 
             # Состояние 4 - Посадка
             if self.state == 4:
-                if not self.st.get_runtime()['comm_ok']:
-                    self.set_state(9)
-                    continue
-                if self.st.get_signals()['stop']:
-                    self.set_state(8)
-                    continue
                 self.lg.log("Получена команда на посадку. Сажусь...")
                 self.vehicle.mode = VehicleMode("LAND")
                 while True:
+                    if not self.st.get_runtime()['comm_ok']:
+                        self.set_state(9)
+                        continue
                     if self.st.get_signals()['stop']:
                         self.set_state(8)
-                        break
+                        continue
                     if self.vehicle.location.global_relative_frame.alt <= 2:
                         time.sleep(2)
                         self.lg.log("Посадка успешна")

@@ -23,7 +23,7 @@ class PowerHandler:
             self.addr = addr
             data = self.bus.read_i2c_block_data(self.addr, 0x00, 3)
             self.enabled = True
-        except:
+        except Exception as e:
             self.lg.error('Нет i2c устройства телеметрии питания по адресу ' + str(hex(addr)))
 
     def start(self):
@@ -42,25 +42,24 @@ class PowerHandler:
     def update(self):
         while self.enabled:
             time.sleep(0.5)
-            while True:
-                try:
-                    data = self.bus.read_i2c_block_data(self.addr, 0x00, 3)
-                    break
-                except:
-                    self.lg.error('Нет могу подключиться к устройству i2c по адресу ' + str(self.addr))
-                    time.sleep(1)
-            state = 1
-            if self.get_battery_charge(round(int(data[2]) * 0.23, 1)) > 75:
-                state = 2
-            self.st.set_power(
-                {
-                    "state": state,
-                    "current_0": data[0],
-                    "current_1": data[1],
-                    "voltage": round(int(data[2]) * 0.23, 1)
-                }
-            )
-            self.st.set_battery_charge(self.get_battery_charge(round(int(data[2]) * 0.23, 1)))
+            try:
+                data = self.bus.read_i2c_block_data(self.addr, 0x00, 3)
+                state = 1
+                if self.get_battery_charge(round(int(data[2]) * 0.23, 1)) > 75:
+                    state = 2
+                self.st.set_power(
+                    {
+                        "state": state,
+                        "current_0": data[0],
+                        "current_1": data[1],
+                        "voltage": round(int(data[2]) * 0.23, 1)
+                    }
+                )
+                self.st.set_battery_charge(self.get_battery_charge(round(int(data[2]) * 0.23, 1)))
+            except Exception as e:
+                self.lg.error('Нет могу подключиться к устройству i2c по адресу ' + str(self.addr))
+                self.enabled = False
+                break
 
     def __del__(self):
         while True:

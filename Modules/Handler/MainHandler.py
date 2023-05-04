@@ -22,11 +22,7 @@ class MainHandler:
         self.config = config
         self.st = st
         self.lg = lg
-        self.power_state = {
-            "state": 1,
-            "voltage": 25,
-            "current": 0.5
-        }
+
         self.main = Thread(target=self.main, daemon=True, args=())
         self.ping = Thread(target=self.ping, daemon=True, args=())
 
