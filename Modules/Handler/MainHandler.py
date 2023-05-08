@@ -1,5 +1,7 @@
+import json
 import math
 import os
+import subprocess
 import sys
 import time
 
@@ -8,7 +10,6 @@ from dronekit import connect
 
 from Modules.Handler.CameraHandler import CameraHandler
 from Modules.Handler.GuidedFlight import GuidedFlight
-from Modules.Handler.PowerHandler import PowerHandler
 
 current = os.path.dirname(os.path.realpath(__file__))
 parent = os.path.dirname(current)
@@ -25,11 +26,15 @@ class MainHandler:
 
         self.main = Thread(target=self.main, daemon=True, args=())
         self.ping = Thread(target=self.ping, daemon=True, args=())
+        self.power = Thread(target=self.power, daemon=True, args=())
 
-        self.PH = PowerHandler(st, lg, 0x22)
         self.CH = CameraHandler(st, lg)
+        self.PH = None
 
-        self.vehicle = connect('/dev/ttyACM0', wait_ready=False, baud=57600)
+        if int(self.st.config['general']['sim']) == 1:
+            self.vehicle = connect('tcp:127.0.0.1:5760', wait_ready=True)
+        else:
+            self.vehicle = connect('/dev/ttyACM0', wait_ready=False, baud=57600)
         if self.vehicle.parameters['LAND_SPEED'] != 30:
             self.vehicle.parameters['LAND_SPEED'] = 30
 
@@ -38,7 +43,7 @@ class MainHandler:
     def start(self):
         self.main.start()
         self.ping.start()
-        self.PH.start()
+        self.power.start()
         self.CH.start()
         self.GF.start()
 
@@ -51,6 +56,31 @@ class MainHandler:
             "alt": int(self.vehicle.location.global_relative_frame.alt) if int(
                 self.vehicle.location.global_relative_frame.alt) > 0 else 0
         }
+
+    def power(self):
+        args = ["python3", "/home/pi/watchman_endpoint/Modules/Handler/PowerHandler.py"]
+        self.PH = subprocess.Popen(args, stdout=subprocess.PIPE)
+        while True:
+            try:
+                time.sleep(0.1)
+                data = self.PH.stdout.readline()
+                if len(data) < 4:
+                    continue
+                if "||" in str(data):
+                    self.lg.error(data.decode(encoding='utf-8'))
+                    continue
+                data = json.loads(data.decode(encoding='utf-8').replace('\n', ""))
+                self.st.set_power(
+                    {
+                        "state": int(data['state']),
+                        "current_0": float(data['current_0']) if float(data['current_0']) > 0 else 0,
+                        "current_1": float(data['current_1']) if float(data['current_1']) > 0 else 0,
+                        "voltage": float(data['voltage']),
+                        "charge": int(data['charge']),
+                    }
+                )
+            except Exception as e:
+                print(e)
 
     def ping(self):
         while True:

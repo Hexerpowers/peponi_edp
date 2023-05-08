@@ -63,7 +63,7 @@ class GuidedFlight:
         self.st.set_copter_state(state)
 
     def power_check(self, level):
-        if bool(self.st.config['general']['use_power_telemetry']):
+        if int(self.st.config['general']['use_power_telemetry']) == 1:
             if self.st.get_battery_charge() >= level:
                 return True
             else:
@@ -110,8 +110,8 @@ class GuidedFlight:
                     timeout = 0
                     while not self.vehicle.armed:
                         time.sleep(0.1)
-                        timeout+=0.1
-                        if timeout >=5:
+                        timeout += 0.1
+                        if timeout >= 5:
                             self.lg.error("Ошибка, коптер не готов к полёту")
                     timeout = 0
                     self.lg.log("Готовность получена")

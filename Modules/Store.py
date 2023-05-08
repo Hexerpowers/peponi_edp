@@ -42,15 +42,14 @@ class Store:
 
         self.ping = 2000
 
-        self.battery_charge = 0
-
         self.controller_address = self.config['network']['controller_addr']
 
         self.power = {
             "state": 0,
             "voltage": 0,
             "current_0": 0,
-            "current_1": 0
+            "current_1": 0,
+            "charge": 0
         }
 
     def get_telemetry(self):
@@ -72,7 +71,7 @@ class Store:
         return self.tracking
 
     def get_battery_charge(self):
-        return self.battery_charge
+        return self.power['charge']
 
     def get_power(self):
         return self.power
@@ -100,9 +99,6 @@ class Store:
 
     def set_ping(self, ping):
         self.ping = ping
-
-    def set_battery_charge(self, level):
-        self.battery_charge = level
 
     def set_power(self, power):
         self.power = power

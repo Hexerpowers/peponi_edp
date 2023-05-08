@@ -1,71 +1,73 @@
+import json
 import math
 import time
-from threading import Thread
+import sys
 
 import smbus
+import signal
 
 
-class PowerHandler:
+def handler(signum, frame):
+    raise Exception("I2C read timeout")
 
-    def __init__(self, st, lg, addr):
-        self.st = st
-        self.lg = lg
-        self.get_power = Thread(target=self.update, daemon=True, args=())
-        self.power_data = {
-            "state": 1,
-            "current_0": 0,
-            "current_1": 0,
-            "voltage": 0
-        }
-        self.enabled = False
+
+def get_battery_charge(voltage):
+    val = int(math.floor((voltage - 41) * 14.29))
+    if val <= 0:
+        val = 0
+    if val >= 100:
+        val = 100
+    return val
+
+
+def update():
+    global enabled, power_data, bus, addr
+    counter = 0
+    while enabled:
         try:
-            self.bus = smbus.SMBus(1)
-            self.addr = addr
-            data = self.bus.read_i2c_block_data(self.addr, 0x00, 3)
-            self.enabled = True
-        except Exception as e:
-            self.lg.error('Нет i2c устройства телеметрии питания по адресу ' + str(hex(addr)))
-
-    def start(self):
-        self.get_power.start()
-        return self
-
-    @staticmethod
-    def get_battery_charge(voltage):
-        val = int(math.floor((voltage - 41) * 14.29))
-        if val <= 0:
-            val = 0
-        if val >= 100:
-            val = 100
-        return val
-
-    def update(self):
-        while self.enabled:
-            time.sleep(0.5)
+            time.sleep(0.005)
+            counter += 1
             try:
-                data = self.bus.read_i2c_block_data(self.addr, 0x00, 3)
+                data = bus.read_i2c_block_data(addr, 0x00, 6)
+                current_0 = round(((data[0] * 256 + data[1]) - 1750) / 18, 1)
+                current_1 = round(((data[2] * 256 + data[3]) - 1750) / 18, 1)
+                voltage = round((data[4] * 256 + data[5]) * 0.2296 / 16, 1)
                 state = 1
-                if self.get_battery_charge(round(int(data[2]) * 0.23, 1)) > 75:
+                charge = get_battery_charge(round(voltage, 1))
+                if charge > 60:
                     state = 2
-                self.st.set_power(
-                    {
-                        "state": state,
-                        "current_0": data[0],
-                        "current_1": data[1],
-                        "voltage": round(int(data[2]) * 0.23, 1)
-                    }
-                )
-                self.st.set_battery_charge(self.get_battery_charge(round(int(data[2]) * 0.23, 1)))
+                power_data = {
+                    "state": state,
+                    "current_0": current_0,
+                    "current_1": current_1,
+                    "voltage": voltage,
+                    "charge": charge
+                }
             except Exception as e:
-                self.lg.error('Нет могу подключиться к устройству i2c по адресу ' + str(self.addr))
-                self.enabled = False
-                break
+                print('||Не могу подключиться к устройству i2c по адресу ' + str(hex(addr)))
+                power_data['state'] = 1
+            if counter >= 100:
+                print(json.dumps(power_data))
+                sys.stdout.flush()
+                counter = 0
+        except Exception as e:
+            pass
+        except KeyboardInterrupt as e:
+            break
 
-    def __del__(self):
-        while True:
-            time.sleep(1)
-            try:
-                self.bus.close()
-                break
-            except:
-                self.lg.error('Нет могу закрыть устройство i2c по адресу ' + str(self.addr))
+
+power_data = {
+    "state": 1,
+    "current_0": 0,
+    "current_1": 0,
+    "voltage": 0,
+    "charge": 0
+}
+enabled = False
+try:
+    bus = smbus.SMBus(1)
+    addr = 0x22
+    enabled = True
+    update()
+except Exception as e:
+    print('||Нет i2c устройства телеметрии питания по адресу ' + str(hex(0x22)))
