@@ -113,10 +113,13 @@ class GuidedFlight:
                         timeout += 0.1
                         if timeout >= 5:
                             self.lg.error("Ошибка, коптер не готов к полёту")
-                    timeout = 0
-                    self.lg.log("Готовность получена")
-                    time.sleep(1)
-                    self.set_state(2)
+                            self.set_state(0)
+                            break
+                    if self.state == 1:
+                        timeout = 0
+                        self.lg.log("Готовность получена")
+                        time.sleep(1)
+                        self.set_state(2)
 
             # Состояние 2 - Взлёт на указанную высоту
             if self.state == 2:
@@ -125,15 +128,21 @@ class GuidedFlight:
                 while True:
                     if not self.power_check(30):
                         self.set_state(0)
+                        break
                     if not self.st.get_runtime()['comm_ok']:
                         self.set_state(9)
-                        continue
+                        break
                     if self.st.get_signals()['stop']:
                         self.set_state(8)
-                        continue
+                        break
+                    if self.st.get_signals()['land']:
+                        self.set_state(4)
+                        break
                     time.sleep(0.1)
                     if self.vehicle.location.global_relative_frame.alt >= 2 * 0.92:
                         break
+                if self.state != 2:
+                    continue
                 a_location = LocationGlobalRelative(self.vehicle.location.global_relative_frame.lat,
                                                     self.vehicle.location.global_relative_frame.lon, 2)
                 self.vehicle.simple_goto(a_location)
@@ -144,12 +153,13 @@ class GuidedFlight:
                 while True:
                     if not self.power_check(30):
                         self.set_state(7)
+                        break
                     if not self.st.get_runtime()['comm_ok']:
                         self.set_state(9)
-                        continue
+                        break
                     if self.st.get_signals()['stop']:
                         self.set_state(8)
-                        continue
+                        break
                     if self.st.get_signals()['land']:
                         self.set_state(4)
                         break
@@ -165,6 +175,7 @@ class GuidedFlight:
             if self.state == 3:
                 if not self.power_check(30):
                     self.set_state(7)
+                    continue
                 if not self.st.get_runtime()['comm_ok']:
                     self.set_state(9)
                     continue
@@ -203,10 +214,10 @@ class GuidedFlight:
                 while True:
                     if not self.st.get_runtime()['comm_ok']:
                         self.set_state(9)
-                        continue
+                        break
                     if self.st.get_signals()['stop']:
                         self.set_state(8)
-                        continue
+                        break
                     if self.vehicle.location.global_relative_frame.alt <= 2:
                         time.sleep(2)
                         self.lg.log("Посадка успешна")
@@ -257,4 +268,6 @@ class GuidedFlight:
                         self.lg.log("Посадка успешна")
                         break
                     time.sleep(0.1)
+                if self.state != 9:
+                    continue
                 self.set_state(1)

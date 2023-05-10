@@ -62,12 +62,12 @@ class MainHandler:
         self.PH = subprocess.Popen(args, stdout=subprocess.PIPE)
         while True:
             try:
-                time.sleep(0.1)
+                time.sleep(0.01)
                 data = self.PH.stdout.readline()
                 if len(data) < 4:
                     continue
                 if "||" in str(data):
-                    self.lg.error(data.decode(encoding='utf-8'))
+                    self.lg.error(data.decode(encoding='utf-8').replace('\n', "").replace('||', ""))
                     continue
                 data = json.loads(data.decode(encoding='utf-8').replace('\n', ""))
                 self.st.set_power(

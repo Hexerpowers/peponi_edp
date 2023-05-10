@@ -24,7 +24,8 @@ class Store:
             "target_alt": 2,
             "return_alt": 2,
             "mode": 0,
-            "copter_state": 0
+            "copter_state": 0,
+            "pir_mode": 0
         }
 
         self.telemetry = {

@@ -1,14 +1,9 @@
 import json
 import math
-import time
 import sys
+import time
 
-import smbus
-import signal
-
-
-def handler(signum, frame):
-    raise Exception("I2C read timeout")
+import spidev
 
 
 def get_battery_charge(voltage):
@@ -21,35 +16,47 @@ def get_battery_charge(voltage):
 
 
 def update():
-    global enabled, power_data, bus, addr
-    counter = 0
+    global enabled, power_data, spi
+    data_stream = [0]*12
     while enabled:
         try:
-            time.sleep(0.005)
-            counter += 1
+            time.sleep(0.01)
             try:
-                data = bus.read_i2c_block_data(addr, 0x00, 6)
-                current_0 = round(((data[0] * 256 + data[1]) - 1750) / 18, 1)
-                current_1 = round(((data[2] * 256 + data[3]) - 1750) / 18, 1)
-                voltage = round((data[4] * 256 + data[5]) * 0.2296 / 16, 1)
-                state = 1
-                charge = get_battery_charge(round(voltage, 1))
-                if charge > 60:
-                    state = 2
-                power_data = {
-                    "state": state,
-                    "current_0": current_0,
-                    "current_1": current_1,
-                    "voltage": voltage,
-                    "charge": charge
-                }
+                tx_data = [0x04]
+                data_stream.pop(0)
+                data_stream.append(spi.xfer(tx_data)[0])
+                # print("||"+str(data_stream))
+
+                if data_stream[0] == 255 and data_stream[1] == 255 and data_stream[2] == 255 and data_stream[3] == 255 and data_stream[4] == 255 and data_stream[5] == 255:
+                    data = [data_stream[6],
+                            data_stream[7],
+                            data_stream[8],
+                            data_stream[9],
+                            data_stream[10],
+                            data_stream[11]
+                            ]
+
+                    current_0 = round(((data[0] * 256 + data[1]) - 1750) / 18, 1)
+                    current_1 = round(((data[2] * 256 + data[3]) - 1750) / 18, 1)
+                    voltage = round((data[4] * 256 + data[5]) * 0.2296 / 16, 1)
+
+                    state = 1
+                    charge = get_battery_charge(round(voltage, 1))
+                    if charge > 60:
+                        state = 2
+                    power_data = {
+                        "state": state,
+                        "current_0": current_0,
+                        "current_1": current_1,
+                        "voltage": voltage,
+                        "charge": charge
+                    }
             except Exception as e:
-                print('||Не могу подключиться к устройству i2c по адресу ' + str(hex(addr)))
+                print('||' + e)
+                print('||Подключение к устройству телеметрии питания утеряно')
                 power_data['state'] = 1
-            if counter >= 100:
-                print(json.dumps(power_data))
-                sys.stdout.flush()
-                counter = 0
+            print(json.dumps(power_data))
+            sys.stdout.flush()
         except Exception as e:
             pass
         except KeyboardInterrupt as e:
@@ -65,9 +72,16 @@ power_data = {
 }
 enabled = False
 try:
-    bus = smbus.SMBus(1)
-    addr = 0x22
+    spi = spidev.SpiDev()
+    spi.close()
+    spi.open(0, 0)
+    spi.lsbfirst = False
+    spi.mode = 0b11
+    spi.bits_per_word = 8
+    spi.no_cs = True
+    spi.max_speed_hz = 100000
+
     enabled = True
     update()
 except Exception as e:
-    print('||Нет i2c устройства телеметрии питания по адресу ' + str(hex(0x22)))
+    print('||Подключение к устройству телеметрии питания отсутствует')

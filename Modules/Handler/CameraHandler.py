@@ -11,6 +11,7 @@ class CameraHandler:
 
         self.enabled = False
         self.mode = False
+        self.pir_mode = 0
 
         self.prev_vals = {
             "cam_pitch": 0,
@@ -89,6 +90,9 @@ class CameraHandler:
                 self.change_mode()
                 self.st.set_signal('mode', False)
 
+            if int(self.st.get_runtime()['pir_mode']) != self.pir_mode:
+                self.change_pir_mode(int(self.st.get_runtime()['pir_mode']))
+
     def pitch_up(self):
         self.sock_out.sendall(b'\xff\x01\x00\x08\x00\x80\x89')
 
@@ -109,6 +113,18 @@ class CameraHandler:
 
     def take_picture(self):
         self.sock_out.sendall(b'\xff\x01\x12\x00\x00\x00\x13')
+
+    def change_pir_mode(self, mode):
+        mode = int(mode)
+        if mode == 0:
+            self.sock_out.sendall(b'\xff\x01\x15\x00\x00\x00\x16')
+        elif mode == 1:
+            self.sock_out.sendall(b'\xff\x01\x15\x00\x01\x00\x17')
+        elif mode == 2:
+            self.sock_out.sendall(b'\xff\x01\x15\x00\x02\x00\x18')
+        else:
+            self.sock_out.sendall(b'\xff\x01\x15\x00\x03\x00\x19')
+        self.pir_mode = mode
 
     def change_mode(self):
         if self.mode:
