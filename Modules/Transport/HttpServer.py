@@ -147,7 +147,7 @@ class HttpServer:
                 "t_yaw": str(self.st.get_telemetry()['t_yaw'])
             }
 
-        self.lg.log("Принимаю запросы...")
+        self.lg.init("Инициализация завершена.")
         if int(self.st.config['general']['show_errors']) == 1:
             uvicorn.run(self.api, host="0.0.0.0", port=5052)
         else:

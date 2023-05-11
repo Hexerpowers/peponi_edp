@@ -6,7 +6,7 @@ class Store:
             "land": False,
             "stop": False,
             "photo": False,
-            "mode": False
+            "main_cam_mode": False
         }
 
         self.move = {
@@ -25,7 +25,7 @@ class Store:
             "return_alt": 2,
             "mode": 0,
             "copter_state": 0,
-            "pir_mode": 0
+            "pir_cam_mode": 0
         }
 
         self.telemetry = {
@@ -43,7 +43,7 @@ class Store:
 
         self.ping = 2000
 
-        self.controller_address = self.config['network']['controller_addr']
+        self.controller_address = self.config['network']['default_controller_address']
 
         self.power = {
             "state": 0,

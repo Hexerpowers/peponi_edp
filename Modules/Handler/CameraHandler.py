@@ -12,6 +12,10 @@ class CameraHandler:
         self.enabled = False
         self.mode = False
         self.pir_mode = 0
+        self.current_zoom = 1
+        self.zoom_timestamp = 0
+
+        self.zoom_time_const = 30 / 3
 
         self.prev_vals = {
             "cam_pitch": 0,
@@ -20,17 +24,17 @@ class CameraHandler:
 
         try:
             self.sock_out = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            self.sock_out.settimeout(2)
-            self.sock_out.connect(('192.168.88.110', 5760))
+            self.sock_out.settimeout(1)
+            self.sock_out.connect((self.st.config['network']['default_camera_address'], 5760))
             self.sock_out.settimeout(None)
             self.enabled = True
-        except:
-            self.lg.error('Камера недоступна')
+        except Exception:
+            self.lg.init('Камера недоступна.')
 
-        self.camera_msg = Thread(target=self.camera_communicate, daemon=True, args=())
+        self.camera_communicate = Thread(target=self.camera_communicate, daemon=True, args=())
 
     def start(self):
-        self.camera_msg.start()
+        self.camera_communicate.start()
         return self
 
     def camera_communicate(self):
@@ -86,12 +90,12 @@ class CameraHandler:
                 self.take_picture()
                 self.st.set_signal('photo', False)
 
-            if self.st.get_signals()['mode']:
+            if self.st.get_signals()['main_cam_mode']:
                 self.change_mode()
-                self.st.set_signal('mode', False)
+                self.st.set_signal('main_cam_mode', False)
 
-            if int(self.st.get_runtime()['pir_mode']) != self.pir_mode:
-                self.change_pir_mode(int(self.st.get_runtime()['pir_mode']))
+            if int(self.st.get_runtime()['pir_cam_mode']) != self.pir_mode:
+                self.change_pir_mode(int(self.st.get_runtime()['pir_cam_mode']))
 
     def pitch_up(self):
         self.sock_out.sendall(b'\xff\x01\x00\x08\x00\x80\x89')
@@ -100,6 +104,7 @@ class CameraHandler:
         self.sock_out.sendall(b'\xff\x01\x00\x10\x00\x80\x91')
 
     def zoom_in(self):
+        self.zoom_timestamp = round(time.time(), 2)
         self.sock_out.sendall(b'\xff\x01\x00\x40\x04\x00\x45')
 
     def zoom_out(self):
@@ -110,6 +115,30 @@ class CameraHandler:
 
     def zoom_stop(self):
         self.sock_out.sendall(b'\xff\x01\x00\x60\x00\x00\x61')
+        zoom_factor = round(time.time(), 2) - self.zoom_timestamp
+        if zoom_factor > 3:
+            zoom_factor = 3
+        if self.prev_vals['cam_zoom'] == 1:
+            self.current_zoom += round(zoom_factor*self.zoom_time_const)
+        if self.prev_vals['cam_zoom'] == -1:
+            self.current_zoom -= round(zoom_factor*self.zoom_time_const)
+
+        if self.current_zoom > 26:
+            self.sock_out.sendall(b'\xff\x01\x17\x00\x08\x00\x20')
+        elif self.current_zoom > 22:
+            self.sock_out.sendall(b'\xff\x01\x17\x00\x07\x00\x1f')
+        elif self.current_zoom > 18:
+            self.sock_out.sendall(b'\xff\x01\x17\x00\x06\x00\x1e')
+        elif self.current_zoom > 15:
+            self.sock_out.sendall(b'\xff\x01\x17\x00\x05\x00\x1d')
+        elif self.current_zoom > 11:
+            self.sock_out.sendall(b'\xff\x01\x17\x00\x04\x00\x1c')
+        elif self.current_zoom > 7:
+            self.sock_out.sendall(b'\xff\x01\x17\x00\x03\x00\x1b')
+        elif self.current_zoom > 3:
+            self.sock_out.sendall(b'\xff\x01\x17\x00\x02\x00\x1a')
+        else:
+            self.sock_out.sendall(b'\xff\x01\x17\x00\x01\x00\x19')
 
     def take_picture(self):
         self.sock_out.sendall(b'\xff\x01\x12\x00\x00\x00\x13')

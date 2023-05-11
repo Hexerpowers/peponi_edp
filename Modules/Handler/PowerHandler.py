@@ -17,7 +17,7 @@ def get_battery_charge(voltage):
 
 def update():
     global enabled, power_data, spi
-    data_stream = [0]*12
+    data_stream = [0] * 12
     while enabled:
         try:
             time.sleep(0.01)
@@ -25,9 +25,9 @@ def update():
                 tx_data = [0x04]
                 data_stream.pop(0)
                 data_stream.append(spi.xfer(tx_data)[0])
-                # print("||"+str(data_stream))
 
-                if data_stream[0] == 255 and data_stream[1] == 255 and data_stream[2] == 255 and data_stream[3] == 255 and data_stream[4] == 255 and data_stream[5] == 255:
+                if data_stream[0] == 255 and data_stream[1] == 255 and data_stream[2] == 255 and data_stream[
+                        3] == 255 and data_stream[4] == 255 and data_stream[5] == 255:
                     data = [data_stream[6],
                             data_stream[7],
                             data_stream[8],
@@ -51,15 +51,14 @@ def update():
                         "voltage": voltage,
                         "charge": charge
                     }
-            except Exception as e:
-                print('||' + e)
-                print('||Подключение к устройству телеметрии питания утеряно')
+            except Exception:
+                print('||Подключение к устройству телеметрии питания утеряно.')
                 power_data['state'] = 1
             print(json.dumps(power_data))
             sys.stdout.flush()
-        except Exception as e:
+        except Exception:
             pass
-        except KeyboardInterrupt as e:
+        except KeyboardInterrupt:
             break
 
 
@@ -84,4 +83,4 @@ try:
     enabled = True
     update()
 except Exception as e:
-    print('||Подключение к устройству телеметрии питания отсутствует')
+    print('||Подключение к устройству телеметрии питания отсутствует.')

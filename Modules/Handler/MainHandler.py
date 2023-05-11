@@ -27,11 +27,12 @@ class MainHandler:
         self.main = Thread(target=self.main, daemon=True, args=())
         self.ping = Thread(target=self.ping, daemon=True, args=())
         self.power = Thread(target=self.power, daemon=True, args=())
+        self.telemetry = Thread(target=self.telemetry, daemon=True, args=())
 
         self.CH = CameraHandler(st, lg)
         self.PH = None
 
-        if int(self.st.config['general']['sim']) == 1:
+        if int(self.st.config['general']['copter_mode']) == 'sim':
             self.vehicle = connect('tcp:127.0.0.1:5760', wait_ready=True)
         else:
             self.vehicle = connect('/dev/ttyACM0', wait_ready=False, baud=57600)
@@ -47,15 +48,19 @@ class MainHandler:
         self.CH.start()
         self.GF.start()
 
-    def get_attitude(self):
-        return {
-            "roll": math.degrees(float(self.vehicle.attitude.roll)),
-            "pitch": math.degrees(float(self.vehicle.attitude.pitch)),
-            "yaw": self.vehicle.heading,
-            "t_yaw": int(self.GF.get_target_yaw()),
-            "alt": int(self.vehicle.location.global_relative_frame.alt) if int(
-                self.vehicle.location.global_relative_frame.alt) > 0 else 0
-        }
+    def telemetry(self):
+        while True:
+            time.sleep(0.2)
+            self.st.set_telemetry(
+                {
+                    "roll": math.degrees(float(self.vehicle.attitude.roll)),
+                    "pitch": math.degrees(float(self.vehicle.attitude.pitch)),
+                    "yaw": self.vehicle.heading,
+                    "t_yaw": int(self.GF.get_target_yaw()),
+                    "alt": int(self.vehicle.location.global_relative_frame.alt) if int(
+                        self.vehicle.location.global_relative_frame.alt) > 0 else 0
+                }
+            )
 
     def power(self):
         args = ["python3", "/home/pi/watchman_endpoint/Modules/Handler/PowerHandler.py"]
@@ -79,12 +84,12 @@ class MainHandler:
                         "charge": int(data['charge']),
                     }
                 )
-            except Exception as e:
-                print(e)
+            except Exception:
+                pass
 
     def ping(self):
         while True:
-            time.sleep(2)
+            time.sleep(1)
             try:
                 response_list = pythonping.ping(self.st.get_controller_address(), size=20, count=2,
                                                 timeout=2)
@@ -100,5 +105,3 @@ class MainHandler:
             if math.floor(time.time()) - tracking['gui_timestamp'] < 5:
                 gui_ok = True
             self.st.set_runtime('comm_ok', gui_ok)
-
-            self.st.set_telemetry(self.get_attitude())

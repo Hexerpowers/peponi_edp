@@ -26,5 +26,5 @@ try:
     while True:
         time.sleep(1)
 except KeyboardInterrupt as e:
-    LG.log('KeyboardInterrupt, остановлено пользователем')
+    LG.log('KeyboardInterrupt, остановлено пользователем.')
     LG.__del__()
