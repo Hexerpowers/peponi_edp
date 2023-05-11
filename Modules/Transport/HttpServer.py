@@ -71,7 +71,7 @@ class HttpServer:
             self.st.set_runtime('ground_speed', settings['ground_speed'])
             self.st.set_runtime('target_alt', settings['target_alt'])
             self.st.set_runtime('return_alt', settings['return_alt'])
-            self.st.set_runtime('pir_mode', settings['camera_mode'])
+            self.st.set_runtime('pir_mode', settings['pir_mode'])
             return {
                 "status": "OK"
             }
