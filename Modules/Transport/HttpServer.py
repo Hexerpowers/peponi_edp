@@ -59,7 +59,7 @@ class HttpServer:
 
         @self.api.get("/api/v1/trig/mode")
         async def trig_mode():
-            self.st.set_signal("mode", True)
+            self.st.set_signal("main_cam_mode", True)
             return {
                 "status": "OK"
             }
@@ -67,11 +67,19 @@ class HttpServer:
         @self.api.post("/api/v1/post/settings")
         async def set_settings(data: Request):
             settings = await data.json()
-            self.st.set_runtime('takeoff_speed', settings['takeoff_speed'])
             self.st.set_runtime('ground_speed', settings['ground_speed'])
             self.st.set_runtime('target_alt', settings['target_alt'])
             self.st.set_runtime('return_alt', settings['return_alt'])
-            self.st.set_runtime('pir_mode', settings['pir_mode'])
+            self.st.set_runtime('pir_cam_mode', settings['pir_mode'])
+            return {
+                "status": "OK"
+            }
+
+        @self.api.post("/api/v1/post/dev_settings")
+        async def set_dev_settings(data: Request):
+            settings = await data.json()
+            self.st.set_runtime('takeoff_speed', settings['takeoff_speed'])
+            self.st.set_runtime('power_onboard', 1 if settings['power_onboard'] == 'true' else 0)
             return {
                 "status": "OK"
             }

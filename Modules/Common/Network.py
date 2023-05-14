@@ -12,9 +12,9 @@ class Network:
     def wait_for_connection(self):
         subnets = str(self.config['network']['working_subnets']). \
             replace(' ', '').replace('[', '').replace(']', '').split(',')
+        local_addresses = []
         for subnet in subnets:
             self.lg.init("Ожидание подключения с подсетью " + subnet + "...")
-        local_addr = None
         net_available = False
         while not net_available:
             for ifaceName in interfaces():
@@ -22,8 +22,9 @@ class Network:
                 for addr in addresses:
                     for subnet in subnets:
                         if subnet in addr:
-                            local_addr = addr
-            if local_addr:
+                            local_addresses.append(addr)
+            if len(local_addresses)>0:
                 net_available = True
-                self.lg.init("Сетевое подключение [" + str(local_addr) + "] обнаружено.")
+                for addr in local_addresses:
+                    self.lg.init("Сетевое подключение [" + str(addr) + "] обнаружено.")
             time.sleep(1)

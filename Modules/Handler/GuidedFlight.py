@@ -63,7 +63,7 @@ class GuidedFlight:
         self.st.set_copter_state(state)
 
     def power_check(self, level):
-        if int(self.st.config['general']['use_power_telemetry']) == 1:
+        if int(self.st.config['general']['use_power_telemetry']) == 1 and self.st.get_runtime()['power_onboard'] == 0:
             if self.st.get_battery_charge() >= level:
                 return True
             else:
@@ -72,7 +72,7 @@ class GuidedFlight:
             return True
 
     def run(self):
-        self.lg.log("Подготовка к взлёту...")
+        self.lg.init("Подготовка к взлёту...")
         while True:
             time.sleep(0.01)
 

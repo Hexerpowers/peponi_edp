@@ -25,7 +25,8 @@ class Store:
             "return_alt": 2,
             "mode": 0,
             "copter_state": 0,
-            "pir_cam_mode": 0
+            "pir_cam_mode": 0,
+            "power_onboard": 0,
         }
 
         self.telemetry = {
@@ -119,5 +120,5 @@ class Store:
             "land": False,
             "stop": False,
             "photo": False,
-            "mode": False,
+            "main_cam_mode": False,
         }

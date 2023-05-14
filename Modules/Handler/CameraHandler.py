@@ -15,7 +15,7 @@ class CameraHandler:
         self.current_zoom = 1
         self.zoom_timestamp = 0
 
-        self.zoom_time_const = 30 / 3
+        self.zoom_time_const = 30 / 7
 
         self.prev_vals = {
             "cam_pitch": 0,
@@ -108,6 +108,7 @@ class CameraHandler:
         self.sock_out.sendall(b'\xff\x01\x00\x40\x04\x00\x45')
 
     def zoom_out(self):
+        self.zoom_timestamp = round(time.time(), 2)
         self.sock_out.sendall(b'\xff\x01\x00\x20\x04\x00\x25')
 
     def pitch_stop(self):
@@ -115,30 +116,27 @@ class CameraHandler:
 
     def zoom_stop(self):
         self.sock_out.sendall(b'\xff\x01\x00\x60\x00\x00\x61')
-        zoom_factor = round(time.time(), 2) - self.zoom_timestamp
-        if zoom_factor > 3:
-            zoom_factor = 3
+        zoom_factor = round(time.time() - self.zoom_timestamp, 2)
+        if zoom_factor > 7:
+            zoom_factor = 7
         if self.prev_vals['cam_zoom'] == 1:
             self.current_zoom += round(zoom_factor*self.zoom_time_const)
         if self.prev_vals['cam_zoom'] == -1:
             self.current_zoom -= round(zoom_factor*self.zoom_time_const)
 
-        if self.current_zoom > 26:
-            self.sock_out.sendall(b'\xff\x01\x17\x00\x08\x00\x20')
-        elif self.current_zoom > 22:
-            self.sock_out.sendall(b'\xff\x01\x17\x00\x07\x00\x1f')
-        elif self.current_zoom > 18:
-            self.sock_out.sendall(b'\xff\x01\x17\x00\x06\x00\x1e')
-        elif self.current_zoom > 15:
-            self.sock_out.sendall(b'\xff\x01\x17\x00\x05\x00\x1d')
-        elif self.current_zoom > 11:
-            self.sock_out.sendall(b'\xff\x01\x17\x00\x04\x00\x1c')
-        elif self.current_zoom > 7:
+        if self.current_zoom > 30:
+            self.current_zoom = 30
+        if self.current_zoom < 1:
+            self.current_zoom = 1
+
+        if self.current_zoom > 23:
             self.sock_out.sendall(b'\xff\x01\x17\x00\x03\x00\x1b')
-        elif self.current_zoom > 3:
+        elif self.current_zoom > 14:
             self.sock_out.sendall(b'\xff\x01\x17\x00\x02\x00\x1a')
-        else:
+        elif self.current_zoom > 7:
             self.sock_out.sendall(b'\xff\x01\x17\x00\x01\x00\x19')
+        else:
+            self.sock_out.sendall(b'\xff\x01\x17\x00\x00\x00\x18')
 
     def take_picture(self):
         self.sock_out.sendall(b'\xff\x01\x12\x00\x00\x00\x13')

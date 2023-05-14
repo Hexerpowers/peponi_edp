@@ -32,7 +32,7 @@ class MainHandler:
         self.CH = CameraHandler(st, lg)
         self.PH = None
 
-        if int(self.st.config['general']['copter_mode']) == 'sim':
+        if self.st.config['general']['copter_mode'] == 'sim':
             self.vehicle = connect('tcp:127.0.0.1:5760', wait_ready=True)
         else:
             self.vehicle = connect('/dev/ttyACM0', wait_ready=False, baud=57600)
@@ -45,6 +45,7 @@ class MainHandler:
         self.main.start()
         self.ping.start()
         self.power.start()
+        self.telemetry.start()
         self.CH.start()
         self.GF.start()
 
