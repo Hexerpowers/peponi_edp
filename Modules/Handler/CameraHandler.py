@@ -21,15 +21,7 @@ class CameraHandler:
             "cam_pitch": 0,
             "cam_zoom": 0,
         }
-
-        try:
-            self.sock_out = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            self.sock_out.settimeout(1)
-            self.sock_out.connect((self.st.config['network']['default_camera_address'], 5760))
-            self.sock_out.settimeout(None)
-            self.enabled = True
-        except Exception:
-            self.lg.init('Камера недоступна.')
+        self.sock_out = None
 
         self.camera_communicate = Thread(target=self.camera_communicate, daemon=True, args=())
 
@@ -38,6 +30,19 @@ class CameraHandler:
         return self
 
     def camera_communicate(self):
+        while True:
+            try:
+                self.sock_out = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                self.sock_out.settimeout(1)
+                self.sock_out.connect((self.st.config['network']['default_camera_address'], 5760))
+                self.sock_out.settimeout(None)
+                self.enabled = True
+                self.lg.init('Камера подключена.')
+                break
+            except Exception:
+                self.lg.init('Камера недоступна.')
+                time.sleep(30)
+
         while self.enabled:
             time.sleep(0.01)
             if int(self.st.get_move()['cam_pitch']) == 1:

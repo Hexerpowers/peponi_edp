@@ -124,6 +124,7 @@ class GuidedFlight:
             # Состояние 2 - Взлёт на указанную высоту
             if self.state == 2:
                 self.lg.log("Ожидание взлёта...")
+                time.sleep(1)
                 self.vehicle.simple_takeoff(2)
                 while True:
                     if not self.power_check(30):
@@ -163,7 +164,7 @@ class GuidedFlight:
                     if self.st.get_signals()['land']:
                         self.set_state(4)
                         break
-                    if self.vehicle.location.global_relative_frame.alt >= float(
+                    if self.vehicle.location.global_relative_frame.alt >= 5+float(
                             self.st.get_runtime()['target_alt']) * 0.98:
                         self.lg.log("Выход на высоту завершён.")
                         self.lg.log("Режим: удержание положения.")
