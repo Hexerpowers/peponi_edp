@@ -64,7 +64,7 @@ class MainHandler:
             )
 
     def power(self):
-        args = ["python3", "/home/pi/watchman_endpoint/Modules/Handler/PowerHandler.py"]
+        args = ["python3", "/home/gamma_copter/watchman_endpoint/Modules/Handler/PowerHandler.py"]
         self.PH = subprocess.Popen(args, stdout=subprocess.PIPE)
         while True:
             try:
@@ -103,6 +103,6 @@ class MainHandler:
             time.sleep(0.25)
             gui_ok = False
             tracking = self.st.get_tracking()
-            if math.floor(time.time()) - tracking['gui_timestamp'] < 5:
+            if math.floor(time.time()) - tracking['gui_timestamp'] < 20:
                 gui_ok = True
             self.st.set_runtime('comm_ok', gui_ok)

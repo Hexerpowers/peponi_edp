@@ -140,7 +140,7 @@ class GuidedFlight:
                         self.set_state(4)
                         break
                     time.sleep(0.1)
-                    if self.vehicle.location.global_relative_frame.alt >= 2 * 0.9:
+                    if self.vehicle.location.global_relative_frame.alt >= 1:
                         break
                 if self.state != 2:
                     continue
@@ -164,13 +164,27 @@ class GuidedFlight:
                     if self.st.get_signals()['land']:
                         self.set_state(4)
                         break
-                    if self.vehicle.location.global_relative_frame.alt >= 5+float(
+                    if self.vehicle.location.global_relative_frame.alt >= float(
                             self.st.get_runtime()['target_alt']) * 0.98:
                         self.lg.log("Выход на высоту завершён.")
                         self.lg.log("Режим: удержание положения.")
                         self.set_state(3)
                         break
-                    self.move_3d(0, 0, float(self.st.get_runtime()['takeoff_speed']))
+
+                    move = self.st.get_move()
+
+                    if int(move['yaw']) == 1:
+                        self.target_yaw += 0.1
+                    elif int(move['yaw']) == -1:
+                        self.target_yaw -= 0.1
+
+                    if self.target_yaw > 360:
+                        self.target_yaw = 0
+                    if self.target_yaw < 0:
+                        self.target_yaw = 360
+
+                    self.move_3d(float(move['x']), float(move['y']), float(self.st.get_runtime()['takeoff_speed']))
+                    self.move_yaw(math.ceil(self.target_yaw))
                     time.sleep(0.1)
 
             # Состояние 3 - Автоматический полёт
@@ -255,13 +269,16 @@ class GuidedFlight:
                         break
                     time.sleep(0.1)
 
-            # Состояние 9 - Ошибка в полёте
+            # Состояние 9 - Ошибка связи
             if self.state == 9:
-                self.lg.error("Ошибка в процессе полёта, посадка.")
+                self.lg.error("Ошибка связи, посадка.")
                 self.move_3d(0, 0, 0)
                 self.vehicle.parameters['RTL_ALT'] = float(self.st.get_runtime()['return_alt'])
-                self.vehicle.mode = VehicleMode("RTL")
+                self.vehicle.mode = VehicleMode("LAND")
                 while True:
+                    if self.st.get_runtime()['comm_ok']:
+                        self.set_state(3)
+                        continue
                     if self.st.get_signals()['stop']:
                         self.set_state(8)
                         break

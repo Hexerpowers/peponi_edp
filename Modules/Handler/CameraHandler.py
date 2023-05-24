@@ -41,7 +41,7 @@ class CameraHandler:
                 break
             except Exception:
                 self.lg.init('Камера недоступна.')
-                time.sleep(30)
+                time.sleep(60)
 
         while self.enabled:
             time.sleep(0.01)
