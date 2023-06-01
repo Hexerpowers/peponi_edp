@@ -3,7 +3,7 @@
   <component name="WebServers">
     <option name="servers">
       <webServer id="c326d6d4-8ee3-4a63-b7cf-dc65bf14c6a0" name="pi88">
-        <fileTransfer accessType="SFTP" host="192.168.22.212" port="22" sshConfigId="92ddc9bb-f486-461d-acec-e0b84c2bbcf7" sshConfig="gamma_copter@192.168.22.212:22 password">
+        <fileTransfer accessType="SFTP" host="192.168.22.124" port="22" sshConfigId="92ddc9bb-f486-461d-acec-e0b84c2bbcf7" sshConfig="gamma_copter@192.168.22.124:22 password">
           <advancedOptions>
             <advancedOptions dataProtectionLevel="Private" passiveMode="true" shareSSLContext="true" />
           </advancedOptions>

@@ -103,6 +103,10 @@ class GuidedFlight:
                 if not self.power_check(30):
                     self.set_state(0)
                 if self.st.get_signals()['takeoff']:
+                    if self.vehicle.parameters['LAND_SPEED'] != 31:
+                        self.vehicle.parameters['LAND_SPEED'] = 31
+                    if self.vehicle.parameters['LAND_SPEED_HIGH'] != 100:
+                        self.vehicle.parameters['LAND_SPEED_HIGH'] = 100
                     self.lg.log("Получена команда на взлёт.")
                     self.vehicle.mode = VehicleMode("GUIDED")
                     self.vehicle.armed = True

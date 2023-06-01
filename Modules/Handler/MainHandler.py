@@ -36,8 +36,6 @@ class MainHandler:
             self.vehicle = connect('tcp:127.0.0.1:5760', wait_ready=True)
         else:
             self.vehicle = connect('/dev/ttyACM0', wait_ready=False, baud=57600)
-        if self.vehicle.parameters['LAND_SPEED'] != 30:
-            self.vehicle.parameters['LAND_SPEED'] = 30
 
         self.GF = GuidedFlight(st, lg, self.vehicle)
 
@@ -64,7 +62,8 @@ class MainHandler:
             )
 
     def power(self):
-        args = ["python3", "/home/gamma_copter/watchman_endpoint/Modules/Handler/PowerHandler.py"]
+        args = ["python3", "/home/" + self.config['general'][
+            'platform_username'] + "/watchman_endpoint/Modules/Handler/PowerHandler.py"]
         self.PH = subprocess.Popen(args, stdout=subprocess.PIPE)
         while True:
             try:
