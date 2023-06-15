@@ -102,6 +102,6 @@ class MainHandler:
             time.sleep(0.25)
             gui_ok = False
             tracking = self.st.get_tracking()
-            if math.floor(time.time()) - tracking['gui_timestamp'] < 20:
+            if math.floor(time.time()) - tracking['gui_timestamp'] < 3:
                 gui_ok = True
             self.st.set_runtime('comm_ok', gui_ok)

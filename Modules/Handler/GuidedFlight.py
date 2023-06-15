@@ -81,7 +81,7 @@ class GuidedFlight:
                 self.vehicle.armed = False
                 if self.st.get_runtime()['comm_ok']:
                     if self.power_check(60):
-                        if self.vehicle.is_armable:
+                        if self.vehicle.is_armable or True:
                             self.power_wait = True
                             self.init_wait = True
                             self.lg.log("Взлёт разрешён.")
@@ -151,7 +151,7 @@ class GuidedFlight:
                 a_location = LocationGlobalRelative(self.vehicle.location.global_relative_frame.lat,
                                                     self.vehicle.location.global_relative_frame.lon, 2)
                 self.vehicle.simple_goto(a_location)
-                time.sleep(1)
+                time.sleep(0.01)
                 self.move_yaw(0)
                 self.move_3d(0, 0, 0)
                 self.lg.log("Ожидание выхода на высоту...")
