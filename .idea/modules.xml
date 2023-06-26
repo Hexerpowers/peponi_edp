@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/progress_endpoint.iml" filepath="$PROJECT_DIR$/.idea/progress_endpoint.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/watchman_endpoint.iml" filepath="$PROJECT_DIR$/.idea/watchman_endpoint.iml" />
     </modules>
   </component>
 </project>
