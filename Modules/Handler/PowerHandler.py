@@ -33,7 +33,8 @@ def update():
                             data_stream[8],
                             data_stream[9],
                             data_stream[10],
-                            data_stream[11]
+                            data_stream[11],
+                            # data_stream[12]
                             ]
 
                     current_0 = round(((data[0] * 256 + data[1]) - 1750) / 18, 1)
@@ -44,6 +45,8 @@ def update():
                     charge = get_battery_charge(round(voltage, 1))
                     if charge > 60:
                         state = 2
+                    # if int(data[12]) == 1:
+                    #     state = 2
                     power_data = {
                         "state": state,
                         "current_0": current_0,

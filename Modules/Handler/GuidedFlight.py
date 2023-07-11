@@ -59,6 +59,7 @@ class GuidedFlight:
 
     def set_state(self, state):
         self.state = state
+        self.st.set_manual_mode(state)
         self.st.drop_signals()
         self.st.set_copter_state(state)
 
@@ -71,6 +72,9 @@ class GuidedFlight:
         else:
             return True
 
+    def external_power_check(self):
+        return self.st.get_power()['state'] == 2
+
     def run(self):
         self.lg.init("Подготовка к взлёту...")
         while True:
@@ -80,39 +84,45 @@ class GuidedFlight:
             if self.state == 0:
                 self.vehicle.armed = False
                 if self.st.get_runtime()['comm_ok']:
-                    if self.power_check(60):
-                        if self.vehicle.is_armable or True:
-                            self.power_wait = True
-                            self.init_wait = True
-                            self.lg.log("Взлёт разрешён.")
-                            self.set_state(1)
-                            continue
+                    if self.power_check(80) and self.external_power_check():
+                        # if self.vehicle.is_armable or True:
+                        self.power_wait = True
+                        self.init_wait = True
+                        self.lg.log("Взлёт разрешён.")
+                        self.set_state(1)
+                        continue
                     else:
                         if self.power_wait:
                             self.lg.log("Недостаточное напряжение питания.")
                         self.power_wait = False
                         time.sleep(0.5)
-                    while not self.vehicle.is_armable:
-                        if self.init_wait:
-                            self.lg.log("Ожидание синхронизации контроллера...")
-                        self.init_wait = False
-                        time.sleep(0.5)
+
+                    if self.st.get_manual_mode() != self.state:
+                        self.set_state(self.st.get_manual_mode())
+                        break
+                    # while not self.vehicle.is_armable:
+                    #     if self.init_wait:
+                    #         self.lg.log("Ожидание синхронизации контроллера...")
+                    #     self.init_wait = False
+                    #     time.sleep(0.5)
 
             # Состояние 1 - Арминг
             if self.state == 1:
                 if not self.power_check(30):
                     self.set_state(0)
+                if self.st.get_manual_mode() != self.state:
+                    self.set_state(self.st.get_manual_mode())
+                    break
                 if self.st.get_signals()['takeoff']:
-                    if self.vehicle.parameters['LAND_SPEED'] != 31:
-                        self.vehicle.parameters['LAND_SPEED'] = 31
-                    if self.vehicle.parameters['LAND_SPEED_HIGH'] != 100:
-                        self.vehicle.parameters['LAND_SPEED_HIGH'] = 100
                     self.lg.log("Получена команда на взлёт.")
                     self.vehicle.mode = VehicleMode("GUIDED")
                     self.vehicle.armed = True
                     self.lg.log("Ожидание готовности...")
                     timeout = 0
                     while not self.vehicle.armed:
+                        if self.st.get_manual_mode() != self.state:
+                            self.set_state(self.st.get_manual_mode())
+                            break
                         time.sleep(0.1)
                         timeout += 0.1
                         if timeout >= 5:
@@ -130,8 +140,12 @@ class GuidedFlight:
                 self.lg.log("Ожидание взлёта...")
                 time.sleep(1)
                 self.vehicle.simple_takeoff(2)
+                timeout = 0
                 while True:
-                    if not self.power_check(30):
+                    if self.st.get_manual_mode() != self.state:
+                        self.set_state(self.st.get_manual_mode())
+                        break
+                    if not self.power_check(40):
                         self.set_state(0)
                         break
                     if not self.st.get_runtime()['comm_ok']:
@@ -144,6 +158,11 @@ class GuidedFlight:
                         self.set_state(4)
                         break
                     time.sleep(0.1)
+                    timeout += 0.1
+                    if timeout >= 5:
+                        self.lg.error("Ошибка, устройство не может совершить взлёт.")
+                        self.set_state(4)
+                        break
                     if self.vehicle.location.global_relative_frame.alt >= 1:
                         break
                 if self.state != 2:
@@ -156,7 +175,10 @@ class GuidedFlight:
                 self.move_3d(0, 0, 0)
                 self.lg.log("Ожидание выхода на высоту...")
                 while True:
-                    if not self.power_check(30):
+                    if self.st.get_manual_mode() != self.state:
+                        self.set_state(self.st.get_manual_mode())
+                        break
+                    if not self.power_check(40):
                         self.set_state(7)
                         break
                     if not self.st.get_runtime()['comm_ok']:
@@ -193,7 +215,10 @@ class GuidedFlight:
 
             # Состояние 3 - Автоматический полёт
             if self.state == 3:
-                if not self.power_check(30):
+                if self.st.get_manual_mode() != self.state:
+                    self.set_state(self.st.get_manual_mode())
+                    break
+                if not self.power_check(40):
                     self.set_state(7)
                     continue
                 if not self.st.get_runtime()['comm_ok']:
@@ -230,8 +255,15 @@ class GuidedFlight:
             # Состояние 4 - Посадка
             if self.state == 4:
                 self.lg.log("Получена команда на посадку.")
+                if self.vehicle.parameters['LAND_SPEED'] != 30:
+                    self.vehicle.parameters['LAND_SPEED'] = 30
+                if self.vehicle.parameters['LAND_SPEED_HIGH'] != 100:
+                    self.vehicle.parameters['LAND_SPEED_HIGH'] = 100
                 self.vehicle.mode = VehicleMode("LAND")
                 while True:
+                    if self.st.get_manual_mode() != self.state:
+                        self.set_state(self.st.get_manual_mode())
+                        break
                     if not self.st.get_runtime()['comm_ok']:
                         self.set_state(9)
                         break
@@ -248,9 +280,16 @@ class GuidedFlight:
             # Состояние 7 - Посадка по причине потери питания
             if self.state == 7:
                 self.lg.error("Низкий уровень напряжения, посадка.")
+                if self.vehicle.parameters['LAND_SPEED'] != 30:
+                    self.vehicle.parameters['LAND_SPEED'] = 30
+                if self.vehicle.parameters['LAND_SPEED_HIGH'] != 100:
+                    self.vehicle.parameters['LAND_SPEED_HIGH'] = 100
                 self.move_3d(0, 0, 0)
                 self.vehicle.mode = VehicleMode("LAND")
                 while True:
+                    if self.st.get_manual_mode() != self.state:
+                        self.set_state(self.st.get_manual_mode())
+                        break
                     if self.vehicle.location.global_relative_frame.alt <= 2:
                         time.sleep(2)
                         self.lg.log("Посадка завершена.")
@@ -264,6 +303,9 @@ class GuidedFlight:
                 self.move_3d(0, 0, 0)
                 self.vehicle.mode = VehicleMode("BRAKE")
                 while True:
+                    if self.st.get_manual_mode() != self.state:
+                        self.set_state(self.st.get_manual_mode())
+                        break
                     if self.st.get_signals()['land']:
                         self.set_state(4)
                         break
@@ -276,10 +318,16 @@ class GuidedFlight:
             # Состояние 9 - Ошибка связи
             if self.state == 9:
                 self.lg.error("Ошибка связи, посадка.")
+                if self.vehicle.parameters['LAND_SPEED'] != 30:
+                    self.vehicle.parameters['LAND_SPEED'] = 30
+                if self.vehicle.parameters['LAND_SPEED_HIGH'] != 100:
+                    self.vehicle.parameters['LAND_SPEED_HIGH'] = 100
                 self.move_3d(0, 0, 0)
-                self.vehicle.parameters['RTL_ALT'] = float(self.st.get_runtime()['return_alt'])
                 self.vehicle.mode = VehicleMode("LAND")
                 while True:
+                    if self.st.get_manual_mode() != self.state:
+                        self.set_state(self.st.get_manual_mode())
+                        break
                     if self.st.get_runtime()['comm_ok']:
                         self.set_state(3)
                         continue

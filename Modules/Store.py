@@ -22,8 +22,6 @@ class Store:
             "takeoff_speed": 0.5,
             "ground_speed": 0.5,
             "target_alt": 2,
-            "return_alt": 2,
-            "mode": 0,
             "copter_state": 0,
             "pir_cam_mode": 0,
             "power_onboard": 0,
@@ -54,6 +52,8 @@ class Store:
             "charge": 0
         }
 
+        self.manual_mode = 0
+
     def get_telemetry(self):
         return self.telemetry
 
@@ -80,6 +80,12 @@ class Store:
 
     def get_controller_address(self):
         return self.controller_address
+
+    def get_manual_mode(self):
+        return self.manual_mode
+
+    def set_manual_mode(self, mode):
+        self.manual_mode = mode
 
     def set_signal(self, signal, val):
         self.signals[signal] = val

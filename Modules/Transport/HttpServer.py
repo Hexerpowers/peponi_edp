@@ -64,12 +64,19 @@ class HttpServer:
                 "status": "OK"
             }
 
+        @self.api.post("/api/v1/post/mode")
+        async def set_manual_mode(data: Request):
+            data = await data.json()
+            self.st.set_manual_mode(data['mode'])
+            return {
+                "status": "OK"
+            }
+
         @self.api.post("/api/v1/post/settings")
         async def set_settings(data: Request):
             settings = await data.json()
             self.st.set_runtime('ground_speed', settings['ground_speed'])
             self.st.set_runtime('target_alt', settings['target_alt'])
-            self.st.set_runtime('return_alt', settings['return_alt'])
             self.st.set_runtime('pir_cam_mode', settings['pir_mode'])
             return {
                 "status": "OK"
@@ -153,6 +160,43 @@ class HttpServer:
                 "pitch": str(self.st.get_telemetry()['pitch']),
                 "yaw": str(self.st.get_telemetry()['yaw']),
                 "t_yaw": str(self.st.get_telemetry()['t_yaw'])
+            }
+
+        @self.api.get("/api/v1/get/debug")
+        async def get_debug():
+            return {
+                "takeoff": str(self.st.get_signals()['takeoff']),
+                "land": str(self.st.get_signals()['land']),
+                "stop": str(self.st.get_signals()['stop']),
+                "photo": str(self.st.get_signals()['photo']),
+                "main_cam_mode": str(self.st.get_signals()['main_cam_mode']),
+
+                "x": str(self.st.get_move()['x']),
+                "y": str(self.st.get_move()['y']),
+                "yaw": str(self.st.get_move()['yaw']),
+                "cam_pitch": str(self.st.get_move()['cam_pitch']),
+                "cam_zom": str(self.st.get_move()['cam_zoom']),
+
+                "comm_ok": str(self.st.get_runtime()['comm_ok']),
+                "takeoff_speed": str(self.st.get_runtime()['takeoff_speed']),
+                "ground_speed": str(self.st.get_runtime()['ground_speed']),
+                "target_alt": str(self.st.get_runtime()['target_alt']),
+                "copter_state": str(self.st.get_runtime()['copter_state']),
+                "pir_cam_mode": str(self.st.get_runtime()['pir_cam_mode']),
+                "power_onboard": str(self.st.get_runtime()['power_onboard']),
+
+
+                "alt": str(self.st.get_telemetry()['alt']),
+                "roll": str(self.st.get_telemetry()['roll']),
+                "pitch": str(self.st.get_telemetry()['pitch']),
+                "tel_yaw": str(self.st.get_telemetry()['yaw']),
+                "t_yaw": str(self.st.get_telemetry()['t_yaw']),
+
+                "state": str(self.st.get_power()['state']),
+                "voltage": str(self.st.get_power()['voltage']),
+                "current_0": str(self.st.get_power()['current_0']),
+                "current_1": str(self.st.get_power()['current_1']),
+                "charge": str(self.st.get_power()['charge'])
             }
 
         self.lg.init("Инициализация завершена.")
