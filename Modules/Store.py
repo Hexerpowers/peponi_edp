@@ -32,7 +32,8 @@ class Store:
             "roll": 0,
             "pitch": 0,
             "yaw": 0,
-            "t_yaw": 0
+            "t_yaw": 0,
+            "gps_sat": 0,
         }
 
         self.tracking = {
@@ -53,6 +54,8 @@ class Store:
         }
 
         self.manual_mode = 0
+        self.reboot_signal = False
+        self.gps_mode = False
 
     def get_telemetry(self):
         return self.telemetry
@@ -83,6 +86,12 @@ class Store:
 
     def get_manual_mode(self):
         return self.manual_mode
+
+    def get_reboot_signal(self):
+        return self.reboot_signal
+
+    def get_gps_mode(self):
+        return self.gps_mode
 
     def set_manual_mode(self, mode):
         self.manual_mode = mode
@@ -119,6 +128,12 @@ class Store:
 
     def set_controller_address(self, controller_address):
         self.controller_address = controller_address
+
+    def set_reboot_signal(self):
+        self.reboot_signal = True
+
+    def set_gps_mode(self, gps_mode):
+        self.gps_mode = int(gps_mode)
 
     def drop_signals(self):
         self.signals = {

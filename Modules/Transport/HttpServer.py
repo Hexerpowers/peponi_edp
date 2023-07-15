@@ -64,6 +64,13 @@ class HttpServer:
                 "status": "OK"
             }
 
+        @self.api.get("/api/v1/trig/reboot")
+        async def trig_reboot():
+            self.st.set_reboot_signal(True)
+            return {
+                "status": "OK"
+            }
+
         @self.api.post("/api/v1/post/mode")
         async def set_manual_mode(data: Request):
             data = await data.json()
@@ -87,6 +94,7 @@ class HttpServer:
             settings = await data.json()
             self.st.set_runtime('takeoff_speed', settings['takeoff_speed'])
             self.st.set_runtime('power_onboard', 1 if settings['power_onboard'] == 'true' else 0)
+            self.st.set_gps_mode(data['mode'])
             return {
                 "status": "OK"
             }
@@ -191,6 +199,7 @@ class HttpServer:
                 "pitch": str(self.st.get_telemetry()['pitch']),
                 "tel_yaw": str(self.st.get_telemetry()['yaw']),
                 "t_yaw": str(self.st.get_telemetry()['t_yaw']),
+                "gps_sat": str(self.st.get_telemetry()['gps_sat']),
 
                 "state": str(self.st.get_power()['state']),
                 "voltage": str(self.st.get_power()['voltage']),
