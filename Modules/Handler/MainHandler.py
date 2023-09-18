@@ -35,7 +35,7 @@ class MainHandler:
         if self.st.config['general']['copter_mode'] == 'sim':
             self.vehicle = connect('tcp:127.0.0.1:5760', wait_ready=True)
         else:
-            self.vehicle = connect('/dev/ttyACM0', wait_ready=True, baud=57600)
+            self.vehicle = connect('/dev/ttyACM0', wait_ready=True, baud=115200, rate=20)
 
         self.GF = GuidedFlight(st, lg, self.vehicle)
         self.prev_gps_mode = False
@@ -50,17 +50,18 @@ class MainHandler:
 
     def telemetry(self):
         while True:
-            time.sleep(0.2)
+            time.sleep(0.04)
             try:
                 self.st.set_telemetry(
                     {
-                        "roll": math.degrees(float(self.vehicle.attitude.roll)),
-                        "pitch": math.degrees(float(self.vehicle.attitude.pitch)),
+                        "roll": round(math.degrees(float(self.vehicle.attitude.roll)), 2),
+                        "pitch": round(math.degrees(float(self.vehicle.attitude.pitch)), 2),
                         "yaw": self.vehicle.heading,
                         "t_yaw": int(self.GF.get_target_yaw()),
                         "alt": int(self.vehicle.location.global_relative_frame.alt)+1 if int(
                             self.vehicle.location.global_relative_frame.alt) > 0 else 0,
-                        "gps_sat": int(self.vehicle.gps_0.satellites_visible) if self.vehicle.gps_0.satellites_visible is not None else 0
+                        "gps_sat": int(self.vehicle.gps_0.satellites_visible) if self.vehicle.gps_0.satellites_visible is not None else 0,
+                        "actual_mode": str(self.vehicle.mode).split(":")[1]
                     }
                 )
             except Exception as e:

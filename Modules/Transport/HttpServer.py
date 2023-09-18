@@ -66,7 +66,7 @@ class HttpServer:
 
         @self.api.get("/api/v1/trig/reboot")
         async def trig_reboot():
-            self.st.set_reboot_signal(True)
+            self.st.set_reboot_signal()
             return {
                 "status": "OK"
             }
@@ -94,7 +94,7 @@ class HttpServer:
             settings = await data.json()
             self.st.set_runtime('takeoff_speed', settings['takeoff_speed'])
             self.st.set_runtime('power_onboard', 1 if settings['power_onboard'] == 'true' else 0)
-            self.st.set_gps_mode(data['mode'])
+            self.st.set_gps_mode(1 if settings['mode'] == 'true' else 0)
             return {
                 "status": "OK"
             }
@@ -200,6 +200,7 @@ class HttpServer:
                 "tel_yaw": str(self.st.get_telemetry()['yaw']),
                 "t_yaw": str(self.st.get_telemetry()['t_yaw']),
                 "gps_sat": str(self.st.get_telemetry()['gps_sat']),
+                "actual_mode": str(self.st.get_telemetry()['actual_mode']),
 
                 "state": str(self.st.get_power()['state']),
                 "voltage": str(self.st.get_power()['voltage']),

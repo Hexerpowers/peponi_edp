@@ -15,6 +15,8 @@ class CameraHandler:
         self.current_zoom = 1
         self.zoom_timestamp = 0
 
+        self.cam_unavailable_message_shown = False
+
         self.zoom_time_const = 30 / 7
 
         self.prev_vals = {
@@ -38,10 +40,13 @@ class CameraHandler:
                 self.sock_out.settimeout(None)
                 self.enabled = True
                 self.lg.init('Камера подключена.')
+                self.cam_unavailable_message_shown = False
                 break
             except Exception:
-                self.lg.init('Камера недоступна.')
-                time.sleep(60)
+                if not self.cam_unavailable_message_shown:
+                    self.lg.init('Камера недоступна.')
+                    self.cam_unavailable_message_shown = True
+                time.sleep(5)
 
         while self.enabled:
             time.sleep(0.01)

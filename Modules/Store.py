@@ -34,6 +34,7 @@ class Store:
             "yaw": 0,
             "t_yaw": 0,
             "gps_sat": 0,
+            "actual_mode": "UNDEFINED"
         }
 
         self.tracking = {

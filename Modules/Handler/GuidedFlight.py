@@ -82,7 +82,11 @@ class GuidedFlight:
 
             # Состояние 0 - Подготовка
             if self.state == 0:
-                self.vehicle.armed = False
+                if int(self.vehicle.location.global_relative_frame.alt) < 2:
+                    self.vehicle.armed = False
+                else:
+                    self.lg.error('НЕВЕРНОЕ СОСТОЯНИЕ В МОМЕНТ ЗАПУСКА.')
+                    self.set_state(8)
                 if self.st.get_runtime()['comm_ok']:
                     if self.power_check(80) and self.external_power_check():
                         # if self.vehicle.is_armable or True:
