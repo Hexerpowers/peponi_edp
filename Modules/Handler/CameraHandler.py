@@ -15,13 +15,12 @@ class CameraHandler:
         self.current_zoom = 1
         self.zoom_timestamp = 0
 
-        self.cam_unavailable_message_shown = False
-
         self.zoom_time_const = 30 / 7
 
         self.prev_vals = {
             "cam_pitch": 0,
             "cam_zoom": 0,
+            "yaw": 0,
         }
         self.sock_out = None
 
@@ -40,13 +39,10 @@ class CameraHandler:
                 self.sock_out.settimeout(None)
                 self.enabled = True
                 self.lg.init('Камера подключена.')
-                self.cam_unavailable_message_shown = False
                 break
             except Exception:
-                if not self.cam_unavailable_message_shown:
-                    self.lg.init('Камера недоступна.')
-                    self.cam_unavailable_message_shown = True
-                time.sleep(5)
+                self.lg.init('Камера недоступна.')
+                time.sleep(60)
 
         while self.enabled:
             time.sleep(0.01)
@@ -72,6 +68,29 @@ class CameraHandler:
                 if self.prev_vals['cam_pitch'] != 0:
                     self.pitch_stop()
                     self.prev_vals['cam_pitch'] = 0
+
+            if int(self.st.get_move()['yaw']) == 1:
+                if self.prev_vals['yaw'] != 1:
+                    if self.prev_vals['yaw'] == 0:
+                        self.yaw_right()
+                        self.prev_vals['yaw'] = 1
+                    if self.prev_vals['yaw'] == -1:
+                        self.pitch_stop()
+                        self.prev_vals['yaw'] = 0
+
+            if int(self.st.get_move()['yaw']) == -1:
+                if self.prev_vals['yaw'] != -1:
+                    if self.prev_vals['yaw'] == 0:
+                        self.yaw_left()
+                        self.prev_vals['yaw'] = -1
+                    if self.prev_vals['yaw'] == 1:
+                        self.pitch_stop()
+                        self.prev_vals['yaw'] = 0
+
+            if int(self.st.get_move()['yaw']) == 0:
+                if self.prev_vals['yaw'] != 0:
+                    self.pitch_stop()
+                    self.prev_vals['yaw'] = 0
 
             if int(self.st.get_move()['cam_zoom']) == 1:
                 if self.prev_vals['cam_zoom'] != 1:
@@ -112,6 +131,12 @@ class CameraHandler:
 
     def pitch_down(self):
         self.sock_out.sendall(b'\xff\x01\x00\x10\x00\x80\x91')
+
+    def yaw_left(self):
+        self.sock_out.sendall(b'\xff\x01\x00\x04\x80\x00\x85')
+
+    def yaw_right(self):
+        self.sock_out.sendall(b'\xff\x01\x00\x02\x80\x00\x83')
 
     def zoom_in(self):
         self.zoom_timestamp = round(time.time(), 2)

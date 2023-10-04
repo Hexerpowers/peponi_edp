@@ -43,7 +43,7 @@ class MainHandler:
     def start(self):
         self.main.start()
         self.ping.start()
-        self.power.start()
+        # self.power.start()
         self.telemetry.start()
         self.CH.start()
         self.GF.start()
@@ -113,48 +113,56 @@ class MainHandler:
             self.st.set_runtime('comm_ok', gui_ok)
             if self.st.get_reboot_signal():
                 os.system('pm2 restart 0')
-
-            if self.st.get_gps_mode():
-                if self.prev_gps_mode != self.st.get_gps_mode():
-                    self.vehicle.parameters['GPS_TYPE'] = 9
-
-                    self.vehicle.parameters['EK3_SRC1_POSXY'] = 3
-                    self.vehicle.parameters['EK3_SRC1_POSZ'] = 1
-                    self.vehicle.parameters['EK3_SRC1_VELXY'] = 3
-                    self.vehicle.parameters['EK3_SRC1_VELZ'] = 3
-                    self.vehicle.parameters['EK3_SRC1_YAW'] = 1
-
-                    self.vehicle.parameters['EK3_SRC2_POSXY'] = 3
-                    self.vehicle.parameters['EK3_SRC2_POSZ'] = 1
-                    self.vehicle.parameters['EK3_SRC2_VELXY'] = 3
-                    self.vehicle.parameters['EK3_SRC2_VELZ'] = 3
-                    self.vehicle.parameters['EK3_SRC2_YAW'] = 1
-
-                    self.vehicle.parameters['EK3_SRC3_POSXY'] = 3
-                    self.vehicle.parameters['EK3_SRC3_POSZ'] = 1
-                    self.vehicle.parameters['EK3_SRC3_VELXY'] = 3
-                    self.vehicle.parameters['EK3_SRC3_VELZ'] = 3
-                    self.vehicle.parameters['EK3_SRC3_YAW'] = 1
-                    self.prev_gps_mode = self.st.get_gps_mode()
-            else:
-                if self.prev_gps_mode != self.st.get_gps_mode():
-                    self.vehicle.parameters['GPS_TYPE'] = 0
-
-                    self.vehicle.parameters['EK3_SRC1_POSXY'] = 0
-                    self.vehicle.parameters['EK3_SRC1_POSZ'] = 1
-                    self.vehicle.parameters['EK3_SRC1_VELXY'] = 5
-                    self.vehicle.parameters['EK3_SRC1_VELZ'] = 0
-                    self.vehicle.parameters['EK3_SRC1_YAW'] = 1
-
-                    self.vehicle.parameters['EK3_SRC2_POSXY'] = 0
-                    self.vehicle.parameters['EK3_SRC2_POSZ'] = 1
-                    self.vehicle.parameters['EK3_SRC2_VELXY'] = 5
-                    self.vehicle.parameters['EK3_SRC2_VELZ'] = 0
-                    self.vehicle.parameters['EK3_SRC2_YAW'] = 1
-
-                    self.vehicle.parameters['EK3_SRC3_POSXY'] = 0
-                    self.vehicle.parameters['EK3_SRC3_POSZ'] = 1
-                    self.vehicle.parameters['EK3_SRC3_VELXY'] = 5
-                    self.vehicle.parameters['EK3_SRC3_VELZ'] = 0
-                    self.vehicle.parameters['EK3_SRC3_YAW'] = 1
-                    self.prev_gps_mode = self.st.get_gps_mode()
+            self.st.set_power(
+                {
+                    "state": 2 if float(self.vehicle.battery.voltage) > 46 else 1,
+                    "current_0": int(self.vehicle.battery.current),
+                    "current_1": 0,
+                    "voltage": float(self.vehicle.battery.voltage),
+                    "charge": int(int(self.vehicle.battery.level)*1.32),
+                }
+            )
+            # if self.st.get_gps_mode():
+            #     if self.prev_gps_mode != self.st.get_gps_mode():
+            #         self.vehicle.parameters['GPS_TYPE'] = 9
+            #
+            #         self.vehicle.parameters['EK3_SRC1_POSXY'] = 3
+            #         self.vehicle.parameters['EK3_SRC1_POSZ'] = 1
+            #         self.vehicle.parameters['EK3_SRC1_VELXY'] = 3
+            #         self.vehicle.parameters['EK3_SRC1_VELZ'] = 3
+            #         self.vehicle.parameters['EK3_SRC1_YAW'] = 1
+            #
+            #         self.vehicle.parameters['EK3_SRC2_POSXY'] = 3
+            #         self.vehicle.parameters['EK3_SRC2_POSZ'] = 1
+            #         self.vehicle.parameters['EK3_SRC2_VELXY'] = 3
+            #         self.vehicle.parameters['EK3_SRC2_VELZ'] = 3
+            #         self.vehicle.parameters['EK3_SRC2_YAW'] = 1
+            #
+            #         self.vehicle.parameters['EK3_SRC3_POSXY'] = 3
+            #         self.vehicle.parameters['EK3_SRC3_POSZ'] = 1
+            #         self.vehicle.parameters['EK3_SRC3_VELXY'] = 3
+            #         self.vehicle.parameters['EK3_SRC3_VELZ'] = 3
+            #         self.vehicle.parameters['EK3_SRC3_YAW'] = 1
+            #         self.prev_gps_mode = self.st.get_gps_mode()
+            # else:
+            #     if self.prev_gps_mode != self.st.get_gps_mode():
+            #         self.vehicle.parameters['GPS_TYPE'] = 0
+            #
+            #         self.vehicle.parameters['EK3_SRC1_POSXY'] = 0
+            #         self.vehicle.parameters['EK3_SRC1_POSZ'] = 1
+            #         self.vehicle.parameters['EK3_SRC1_VELXY'] = 5
+            #         self.vehicle.parameters['EK3_SRC1_VELZ'] = 0
+            #         self.vehicle.parameters['EK3_SRC1_YAW'] = 1
+            #
+            #         self.vehicle.parameters['EK3_SRC2_POSXY'] = 0
+            #         self.vehicle.parameters['EK3_SRC2_POSZ'] = 1
+            #         self.vehicle.parameters['EK3_SRC2_VELXY'] = 5
+            #         self.vehicle.parameters['EK3_SRC2_VELZ'] = 0
+            #         self.vehicle.parameters['EK3_SRC2_YAW'] = 1
+            #
+            #         self.vehicle.parameters['EK3_SRC3_POSXY'] = 0
+            #         self.vehicle.parameters['EK3_SRC3_POSZ'] = 1
+            #         self.vehicle.parameters['EK3_SRC3_VELXY'] = 5
+            #         self.vehicle.parameters['EK3_SRC3_VELZ'] = 0
+            #         self.vehicle.parameters['EK3_SRC3_YAW'] = 1
+            #         self.prev_gps_mode = self.st.get_gps_mode()
