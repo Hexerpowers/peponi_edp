@@ -142,14 +142,16 @@ class GuidedFlight:
             # Состояние 2 - Взлёт на указанную высоту
             if self.state == 2:
                 self.lg.log("Ожидание взлёта...")
+                time.sleep(2)
+                self.vehicle.simple_takeoff(1)
                 time.sleep(1)
-                self.vehicle.simple_takeoff(2)
                 timeout = 0
                 while True:
                     if self.st.get_manual_mode() != self.state:
                         self.set_state(self.st.get_manual_mode())
                         break
-                    if not self.power_check(40):
+                    if not self.power_check(20):
+                        self.lg.error("Ошибка, низкое напряжение.")
                         self.set_state(0)
                         break
                     if not self.st.get_runtime()['comm_ok']:
@@ -172,7 +174,7 @@ class GuidedFlight:
                 if self.state != 2:
                     continue
                 a_location = LocationGlobalRelative(self.vehicle.location.global_relative_frame.lat,
-                                                    self.vehicle.location.global_relative_frame.lon, 2)
+                                                    self.vehicle.location.global_relative_frame.lon, 1)
                 self.vehicle.simple_goto(a_location)
                 time.sleep(0.01)
                 self.move_yaw(0)
