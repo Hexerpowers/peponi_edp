@@ -2,15 +2,8 @@
 <project version="4">
   <component name="WebServers">
     <option name="servers">
-      <webServer id="c326d6d4-8ee3-4a63-b7cf-dc65bf14c6a0" name="pi88">
-        <fileTransfer accessType="SFTP" host="192.168.88.254" port="22" sshConfigId="92ddc9bb-f486-461d-acec-e0b84c2bbcf7" sshConfig="gamma_copter@192.168.88.254:22 password">
-          <advancedOptions>
-            <advancedOptions dataProtectionLevel="Private" passiveMode="true" shareSSLContext="true" />
-          </advancedOptions>
-        </fileTransfer>
-      </webServer>
-      <webServer id="7600dfaf-3b2c-42e0-9f97-2e022095e795" name="pi@wifi">
-        <fileTransfer accessType="SFTP" host="192.168.31.104" port="22" sshConfigId="b66e1adc-3899-4af5-a2fe-864133518c45" sshConfig="pi@192.168.31.104:22 password">
+      <webServer id="09d94848-a91b-4801-b7c7-6a2fcffc727b" name="pi@auto">
+        <fileTransfer accessType="SFTP" host="g2c.local" port="22" sshConfigId="42cd5532-6ef6-49ef-ac84-576d22a4a532" sshConfig="gamma_copter@g2c.local:22 password">
           <advancedOptions>
             <advancedOptions dataProtectionLevel="Private" keepAliveTimeout="0" passiveMode="true" shareSSLContext="true" />
           </advancedOptions>

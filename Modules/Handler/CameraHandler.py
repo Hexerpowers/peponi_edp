@@ -69,28 +69,28 @@ class CameraHandler:
                     self.pitch_stop()
                     self.prev_vals['cam_pitch'] = 0
 
-            if int(self.st.get_move()['yaw']) == 1:
-                if self.prev_vals['yaw'] != 1:
-                    if self.prev_vals['yaw'] == 0:
-                        self.yaw_right()
-                        self.prev_vals['yaw'] = 1
-                    if self.prev_vals['yaw'] == -1:
-                        self.pitch_stop()
-                        self.prev_vals['yaw'] = 0
-
-            if int(self.st.get_move()['yaw']) == -1:
-                if self.prev_vals['yaw'] != -1:
-                    if self.prev_vals['yaw'] == 0:
-                        self.yaw_left()
-                        self.prev_vals['yaw'] = -1
-                    if self.prev_vals['yaw'] == 1:
-                        self.pitch_stop()
-                        self.prev_vals['yaw'] = 0
-
-            if int(self.st.get_move()['yaw']) == 0:
-                if self.prev_vals['yaw'] != 0:
-                    self.pitch_stop()
-                    self.prev_vals['yaw'] = 0
+            # if int(self.st.get_move()['yaw']) == 1:
+            #     if self.prev_vals['yaw'] != 1:
+            #         if self.prev_vals['yaw'] == 0:
+            #             self.yaw_right()
+            #             self.prev_vals['yaw'] = 1
+            #         if self.prev_vals['yaw'] == -1:
+            #             self.pitch_stop()
+            #             self.prev_vals['yaw'] = 0
+            #
+            # if int(self.st.get_move()['yaw']) == -1:
+            #     if self.prev_vals['yaw'] != -1:
+            #         if self.prev_vals['yaw'] == 0:
+            #             self.yaw_left()
+            #             self.prev_vals['yaw'] = -1
+            #         if self.prev_vals['yaw'] == 1:
+            #             self.pitch_stop()
+            #             self.prev_vals['yaw'] = 0
+            #
+            # if int(self.st.get_move()['yaw']) == 0:
+            #     if self.prev_vals['yaw'] != 0:
+            #         self.pitch_stop()
+            #         self.prev_vals['yaw'] = 0
 
             if int(self.st.get_move()['cam_zoom']) == 1:
                 if self.prev_vals['cam_zoom'] != 1:
@@ -196,4 +196,5 @@ class CameraHandler:
         self.mode = not self.mode
 
     def __del__(self):
-        self.sock_out.close()
+        if self.enabled:
+            self.sock_out.close()

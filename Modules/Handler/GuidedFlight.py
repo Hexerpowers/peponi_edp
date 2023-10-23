@@ -73,7 +73,10 @@ class GuidedFlight:
             return True
 
     def external_power_check(self):
-        return self.st.get_power()['state'] == 2
+        if int(self.st.config['general']['use_power_telemetry']) == 1 and self.st.get_runtime()['power_onboard'] == 0:
+            return self.st.get_power()['state'] == 2
+        else:
+            return True
 
     def run(self):
         self.lg.init("Подготовка к взлёту...")

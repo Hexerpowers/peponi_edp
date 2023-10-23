@@ -8,8 +8,10 @@ import time
 import pythonping
 from dronekit import connect
 
+from Modules.Common.Logger import Logger
 from Modules.Handler.CameraHandler import CameraHandler
 from Modules.Handler.GuidedFlight import GuidedFlight
+from Modules.Store import Store
 
 current = os.path.dirname(os.path.realpath(__file__))
 parent = os.path.dirname(current)
@@ -19,7 +21,7 @@ from threading import Thread
 
 
 class MainHandler:
-    def __init__(self, config, st, lg):
+    def __init__(self, config, st: Store, lg: Logger):
         self.config = config
         self.st = st
         self.lg = lg
@@ -32,10 +34,17 @@ class MainHandler:
         self.CH = CameraHandler(st, lg)
         self.PH = None
 
+        self.initialized = False
+
         if self.st.config['general']['copter_mode'] == 'sim':
             self.vehicle = connect('tcp:127.0.0.1:5760', wait_ready=True)
         else:
-            self.vehicle = connect('/dev/ttyACM0', wait_ready=True, baud=115200, rate=20)
+            if os.path.exists('/dev/ttyACM0'):
+                self.vehicle = connect('/dev/ttyACM0', wait_ready=True, baud=115200, rate=20)
+                self.initialized = True
+            else:
+                self.lg.error("Полётный контроллер не обнаружен.")
+                return
 
         self.GF = GuidedFlight(st, lg, self.vehicle)
         self.prev_gps_mode = False
@@ -43,7 +52,7 @@ class MainHandler:
     def start(self):
         self.main.start()
         self.ping.start()
-        # self.power.start()
+        self.power.start()
         self.telemetry.start()
         self.CH.start()
         self.GF.start()
@@ -113,15 +122,15 @@ class MainHandler:
             self.st.set_runtime('comm_ok', gui_ok)
             if self.st.get_reboot_signal():
                 os.system('pm2 restart 0')
-            self.st.set_power(
-                {
-                    "state": 2 if float(self.vehicle.battery.voltage) > 46 else 1,
-                    "current_0": int(self.vehicle.battery.current),
-                    "current_1": 0,
-                    "voltage": float(self.vehicle.battery.voltage),
-                    "charge": int(int(self.vehicle.battery.level)*1.32),
-                }
-            )
+            # self.st.set_power(
+            #     {
+            #         "state": 2 if float(self.vehicle.battery.voltage) > 46 else 1,
+            #         "current_0": int(self.vehicle.battery.current),
+            #         "current_1": 0,
+            #         "voltage": float(self.vehicle.battery.voltage),
+            #         "charge": int(int(self.vehicle.battery.level)*1.32),
+            #     }
+            # )
             # if self.st.get_gps_mode():
             #     if self.prev_gps_mode != self.st.get_gps_mode():
             #         self.vehicle.parameters['GPS_TYPE'] = 9

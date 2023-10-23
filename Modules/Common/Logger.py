@@ -17,12 +17,16 @@ class Logger:
         self.log_file.close()
 
     def __del__(self):
-        self.cls.print(
-            "[gray]\[" + str(datetime.now()) + "][/][red bold]::[/][blue bold]INFO[/][red bold]::[/]Завершение работы.")
-        self.log_file = open(os.path.dirname(os.path.abspath(__file__)) + '/../../log.txt', 'a+')
-        self.log_file.write('[' + str(datetime.now()) + ']::INFO::Завершение работы.\n')
-        self.log_file.write("---------------SHUTDOWN---------------\n")
-        self.log_file.close()
+        try:
+            self.cls.print(
+                "[gray]\[" + str(
+                    datetime.now()) + "][/][red bold]::[/][blue bold]INFO[/][red bold]::[/]Завершение работы.")
+            self.log_file = open(os.path.dirname(os.path.abspath(__file__)) + '/../../log.txt', 'a+')
+            self.log_file.write('[' + str(datetime.now()) + ']::INFO::Завершение работы.\n')
+            self.log_file.write("---------------SHUTDOWN---------------\n")
+            self.log_file.close()
+        except Exception as e:
+            pass
 
     def log(self, msg):
         self.log_file = open(os.path.dirname(os.path.abspath(__file__)) + '/../../log.txt', 'a+')
