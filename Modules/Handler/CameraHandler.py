@@ -24,6 +24,8 @@ class CameraHandler:
         }
         self.sock_out = None
 
+        self.show_unavail_msg = True
+
         self.camera_communicate = Thread(target=self.camera_communicate, daemon=True, args=())
 
     def start(self):
@@ -39,10 +41,13 @@ class CameraHandler:
                 self.sock_out.settimeout(None)
                 self.enabled = True
                 self.lg.init('Камера подключена.')
+                self.show_unavail_msg = True
                 break
             except Exception:
-                self.lg.init('Камера недоступна.')
-                time.sleep(10)
+                if self.show_unavail_msg:
+                    self.lg.init('Камера недоступна.')
+                    self.show_unavail_msg = False
+                time.sleep(5)
 
         while self.enabled:
             time.sleep(0.01)

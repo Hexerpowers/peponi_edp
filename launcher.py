@@ -8,7 +8,7 @@ from Modules.Store import Store
 from Modules.Transport.HttpServer import HttpServer
 
 config = configparser.ConfigParser()
-config.read("/home/gamma_copter/watchman_endpoint/endpoint.cfg")
+config.read("/home/cop/watchman_endpoint/endpoint.cfg")
 # config.read("endpoint.cfg")
 
 LG = Logger(config)

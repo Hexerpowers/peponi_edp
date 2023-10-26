@@ -2,7 +2,7 @@
 <project version="4">
   <component name="SshConfigs">
     <configs>
-      <sshConfig authType="PASSWORD" host="g2c.local" id="42cd5532-6ef6-49ef-ac84-576d22a4a532" port="22" nameFormat="DESCRIPTIVE" username="gamma_copter" useOpenSSHConfig="true" />
+      <sshConfig authType="PASSWORD" host="g2c.local" id="42cd5532-6ef6-49ef-ac84-576d22a4a532" port="22" nameFormat="DESCRIPTIVE" username="cop" useOpenSSHConfig="true" />
     </configs>
   </component>
 </project>

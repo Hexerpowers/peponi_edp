@@ -37,7 +37,8 @@ class MainHandler:
         self.initialized = False
 
         if self.st.config['general']['copter_mode'] == 'sim':
-            self.vehicle = connect('tcp:127.0.0.1:5760', wait_ready=True)
+            self.vehicle = connect('tcp:192.168.1.77:5762', rate=20)
+            self.initialized = True
         else:
             if os.path.exists('/dev/ttyACM0'):
                 self.vehicle = connect('/dev/ttyACM0', wait_ready=True, baud=115200, rate=20)

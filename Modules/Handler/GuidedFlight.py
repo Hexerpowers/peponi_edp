@@ -144,6 +144,7 @@ class GuidedFlight:
 
             # Состояние 2 - Взлёт на указанную высоту
             if self.state == 2:
+                self.vehicle.mode = VehicleMode("GUIDED")
                 self.lg.log("Ожидание взлёта...")
                 time.sleep(2)
                 self.vehicle.simple_takeoff(1)
@@ -226,7 +227,7 @@ class GuidedFlight:
             if self.state == 3:
                 if self.st.get_manual_mode() != self.state:
                     self.set_state(self.st.get_manual_mode())
-                    break
+                    continue
                 if not self.power_check(40):
                     self.set_state(7)
                     continue
@@ -338,8 +339,8 @@ class GuidedFlight:
                         self.set_state(self.st.get_manual_mode())
                         break
                     if self.st.get_runtime()['comm_ok']:
-                        self.set_state(3)
-                        continue
+                        self.set_state(2)
+                        break
                     if self.st.get_signals()['stop']:
                         self.set_state(8)
                         break
