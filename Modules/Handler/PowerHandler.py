@@ -16,7 +16,7 @@ def get_battery_charge(voltage):
 
 
 def update():
-    global enabled, power_data, spi
+    global enabled, power_data, spi, prev_voltage, abnormal_counter
     data_stream = [0] * 12
     while enabled:
         try:
@@ -45,13 +45,28 @@ def update():
                     charge = get_battery_charge(round(voltage, 1))
                     if charge > 60:
                         state = 2
+
+                    if prev_voltage - voltage > 5:
+                        abnormal_counter += 1
+                        if abnormal_counter > 5:
+                            real_voltage = voltage
+                            prev_voltage = voltage
+                            abnormal_counter = 0
+                        else:
+                            real_voltage = prev_voltage
+                    else:
+                        abnormal_counter = 0
+                        prev_voltage = voltage
+                        real_voltage = voltage
+
                     # if int(data[12]) == 1:
                     #     state = 2
+
                     power_data = {
                         "state": state,
                         "current_0": current_0,
                         "current_1": current_1,
-                        "voltage": voltage,
+                        "voltage": real_voltage,
                         "charge": charge
                     }
             except Exception:
@@ -84,6 +99,9 @@ try:
     spi.max_speed_hz = 100000
 
     enabled = True
+
+    prev_voltage = 0
+    abnormal_counter = 0
     update()
 except Exception as e:
     print('||Подключение к устройству телеметрии питания отсутствует.')

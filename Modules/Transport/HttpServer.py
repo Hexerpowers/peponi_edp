@@ -209,6 +209,7 @@ class HttpServer:
                 "charge": str(self.st.get_power()['charge'])
             }
 
+        self.lg.init("Версия приложения: "+str(self.config['general']['rev_version']))
         self.lg.init("Инициализация завершена.")
         if int(self.st.config['general']['show_errors']) == 1:
             uvicorn.run(self.api, host="0.0.0.0", port=5052)

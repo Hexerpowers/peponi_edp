@@ -3,13 +3,6 @@
   <component name="PublishConfigData" autoUpload="On explicit save action" serverName="pi@auto" remoteFilesAllowedToDisappearOnAutoupload="false" confirmBeforeUploading="false" autoUploadExternalChanges="true">
     <option name="confirmBeforeUploading" value="false" />
     <serverData>
-      <paths name="jet@192.168.88.252:22 password">
-        <serverdata>
-          <mappings>
-            <mapping local="$PROJECT_DIR$" web="/" />
-          </mappings>
-        </serverdata>
-      </paths>
       <paths name="pi@auto">
         <serverdata>
           <mappings>
@@ -20,7 +13,7 @@
       <paths name="pi@hank">
         <serverdata>
           <mappings>
-            <mapping deploy="/home/gamma_copter/watchman_endpoint" local="$PROJECT_DIR$" web="/" />
+            <mapping deploy="/home/cop/watchman_endpoint" local="$PROJECT_DIR$" web="/" />
           </mappings>
         </serverdata>
       </paths>
