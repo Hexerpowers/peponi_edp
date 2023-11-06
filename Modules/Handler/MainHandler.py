@@ -37,7 +37,7 @@ class MainHandler:
         self.initialized = False
 
         if self.st.config['general']['copter_mode'] == 'sim':
-            self.vehicle = connect('tcp:192.168.1.77:5762', rate=20)
+            self.vehicle = connect('tcp:192.168.137.1:5762', rate=20)
             self.initialized = True
         else:
             if os.path.exists('/dev/ttyACM0'):
@@ -53,10 +53,19 @@ class MainHandler:
     def start(self):
         self.main.start()
         self.ping.start()
-        self.power.start()
+        # self.power.start()
         self.telemetry.start()
-        self.CH.start()
+        # self.CH.start()
         self.GF.start()
+
+    @staticmethod
+    def get_battery_charge(voltage):
+        val = int(math.floor((voltage - 12) * 20.84))
+        if val <= 0:
+            val = 0
+        if val >= 100:
+            val = 100
+        return val
 
     def telemetry(self):
         while True:
@@ -72,6 +81,15 @@ class MainHandler:
                             self.vehicle.location.global_relative_frame.alt) > 0 else 0,
                         "gps_sat": int(self.vehicle.gps_0.satellites_visible) if self.vehicle.gps_0.satellites_visible is not None else 0,
                         "actual_mode": str(self.vehicle.mode).split(":")[1]
+                    }
+                )
+                self.st.set_power(
+                    {
+                        "state": 2,
+                        "voltage": float(self.vehicle.battery.voltage),
+                        "current_0": 0,
+                        "current_1": 0,
+                        "charge": self.get_battery_charge(float(self.vehicle.battery.voltage))
                     }
                 )
             except Exception as e:

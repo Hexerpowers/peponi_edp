@@ -3,6 +3,7 @@
   <component name="SshConfigs">
     <configs>
       <sshConfig authType="PASSWORD" host="g2c.local" id="42cd5532-6ef6-49ef-ac84-576d22a4a532" port="22" nameFormat="DESCRIPTIVE" username="cop" useOpenSSHConfig="true" />
+      <sshConfig authType="PASSWORD" host="rpi4.local" id="4aafc7fe-aee9-4f13-b0ae-c1f651fa4786" port="22" nameFormat="DESCRIPTIVE" username="pi" useOpenSSHConfig="true" />
     </configs>
   </component>
 </project>

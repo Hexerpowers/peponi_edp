@@ -43,6 +43,13 @@ class HttpServer:
                 "status": "OK"
             }
 
+        @self.api.get("/api/v1/trig/mission")
+        async def trig_mission():
+            self.st.set_signal("mission", not bool(self.st.get_signals()['mission']))
+            return {
+                "status": "OK"
+            }
+
         @self.api.get("/api/v1/trig/land")
         async def trig_land():
             self.st.set_signal("land", True)
@@ -79,25 +86,34 @@ class HttpServer:
                 "status": "OK"
             }
 
+        @self.api.post("/api/v1/post/mission_plan")
+        async def set_manual_mode(data: Request):
+            data = await data.json()
+            self.st.set_wp_list(data['wp_list'])
+            return {
+                "status": "OK"
+            }
+
         @self.api.post("/api/v1/post/settings")
         async def set_settings(data: Request):
             settings = await data.json()
             self.st.set_runtime('ground_speed', settings['ground_speed'])
             self.st.set_runtime('target_alt', settings['target_alt'])
-            self.st.set_runtime('pir_cam_mode', settings['pir_mode'])
-            return {
-                "status": "OK"
-            }
-
-        @self.api.post("/api/v1/post/dev_settings")
-        async def set_dev_settings(data: Request):
-            settings = await data.json()
-            self.st.set_runtime('takeoff_speed', settings['takeoff_speed'])
             self.st.set_runtime('power_onboard', 1 if settings['power_onboard'] == 'true' else 0)
-            self.st.set_gps_mode(1 if settings['mode'] == 'true' else 0)
+
             return {
-                "status": "OK"
-            }
+                    "status": "OK"
+                }
+
+        # @self.api.post("/api/v1/post/dev_settings")
+        # async def set_dev_settings(data: Request):
+        #     settings = await data.json()
+        #     self.st.set_runtime('takeoff_speed', settings['takeoff_speed'])
+        #     self.st.set_runtime('power_onboard', 1 if settings['power_onboard'] == 'true' else 0)
+        #     self.st.set_gps_mode(1 if settings['mode'] == 'true' else 0)
+        #     return {
+        #         "status": "OK"
+        #     }
 
         @self.api.post("/api/v1/post/move")
         async def set_move(data: Request):
@@ -178,6 +194,7 @@ class HttpServer:
                 "stop": str(self.st.get_signals()['stop']),
                 "photo": str(self.st.get_signals()['photo']),
                 "main_cam_mode": str(self.st.get_signals()['main_cam_mode']),
+                "mission": str(self.st.get_signals()['mission']),
 
                 "x": str(self.st.get_move()['x']),
                 "y": str(self.st.get_move()['y']),

@@ -6,7 +6,8 @@ class Store:
             "land": False,
             "stop": False,
             "photo": False,
-            "main_cam_mode": False
+            "main_cam_mode": False,
+            "mission": False
         }
 
         self.move = {
@@ -36,6 +37,8 @@ class Store:
             "gps_sat": 0,
             "actual_mode": "UNDEFINED"
         }
+
+        self.wp_list = []
 
         self.tracking = {
             "gui_timestamp": 0,
@@ -94,6 +97,9 @@ class Store:
     def get_gps_mode(self):
         return self.gps_mode
 
+    def get_wp_list(self):
+        return self.wp_list
+
     def set_manual_mode(self, mode):
         self.manual_mode = mode
 
@@ -136,6 +142,9 @@ class Store:
     def set_gps_mode(self, gps_mode):
         self.gps_mode = int(gps_mode)
 
+    def set_wp_list(self, plan):
+        self.wp_list = [x.split(',') for x in plan[2:-2].split('],[')]
+
     def drop_signals(self):
         self.signals = {
             "takeoff": False,
@@ -143,4 +152,5 @@ class Store:
             "stop": False,
             "photo": False,
             "main_cam_mode": False,
+            "mission": False
         }
